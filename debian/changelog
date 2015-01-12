@@ -12,7 +12,7 @@ umplayer (1:201501120524+git08bf565-minos) unstable; urgency=high
   * Add optional umplayer-dbg package
   * Add minos comments in the about window
 
- -- Javier Lopez <chilicuil@ubuntu.com>  Sat, 21 Nov 2014 14:08:08 +0600
+ -- Javier P.L. <chilicuil@ubuntu.com>  Sat, 21 Nov 2014 14:08:08 +0600
 
 umplayer (0.95) unstable; urgency=high
 

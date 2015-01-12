@@ -1,0 +1,31 @@
+umplayer (1:201501120524+git08bf565-minos) unstable; urgency=high
+
+  * Remove youtube (broken anyway) and shoutcast (there are better programs
+    for listening online radio)
+  * Remove background refreshing (faster and prettier)
+  * Remove links to faq, social networks and original web page (abandoned)
+  * Remove annoying facebook and initial language messages
+  * Remove floating control widget (ugly and unnecessary)
+  * Change default Ctrl+F -> Ctrl+O for openning files
+  * Quit by pressing 'q', just as mplayer{,2}
+  * Use a modified black theme by default
+  * Add optional umplayer-dbg package
+  * Add minos comments in the about window
+
+ -- Javier Lopez <chilicuil@ubuntu.com>  Sat, 21 Nov 2014 14:08:08 +0600
+
+umplayer (0.95) unstable; urgency=high
+
+  * debian/compat:
+    - Bumped to 7.
+  * debian/control:
+    - Changed maintainer to team.
+    - Build-depend on dh 7, no cdbs.
+  * debian/rules, debian/clean:
+    - Rewritten to use dh 7.
+    - Set DOC_PATH and remove an unneeded upstream file.
+  * debian/umplayer.install, debian/umplayer.doc-base:
+    - Install upstream docs correctly. (Closes: #557069)
+  * Dropped debian/README.source - not using CDBS simple-patchsys anymore.
+
+ -- Maia Kozheva <sikon@ubuntu.com>  Sat, 21 Nov 2009 14:08:08 +0600

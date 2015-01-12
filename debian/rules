@@ -1,0 +1,38 @@
+#!/usr/bin/make -f
+
+DEB_VERSION:=$(shell dpkg-parsechangelog -n1 | sed -n '/^Version: /s///p')
+DEB_UPSTREAM_VERSION:=$(shell DEB_VERSION=${DEB_VERSION}; echo $${DEB_VERSION%-*})
+DEB_UPSTREAM_VERSION:=$(shell DEB_UPSTREAM_VERSION=${DEB_UPSTREAM_VERSION}; echo $${DEB_UPSTREAM_VERSION\#*:})
+DEB_MASTER_VERSION:=$(shell DEB_UPSTREAM_VERSION=${DEB_UPSTREAM_VERSION}; echo $${DEB_UPSTREAM_VERSION\#*+git})
+
+# Uncomment this to turn on verbose mode.
+export DH_VERBOSE=1
+
+QMAKE_OPTS = DEFINES+=NO_DEBUG_ON_CONSOLE
+MAKE_OPTS  = PREFIX=/usr QMAKE=qmake-qt4 LRELEASE=lrelease-qt4 QMAKE_OPTS="$(QMAKE_OPTS)"
+
+override_dh_auto_clean:
+	[ ! -f src/Makefile ] || dh_auto_clean
+
+override_dh_auto_build:
+	dh_auto_build -- $(MAKE_OPTS) DOC_PATH=\\\"/usr/share/doc/umplayer\\\"
+
+override_dh_auto_install:
+	dh_auto_install -- $(MAKE_OPTS) DOC_PATH=/usr/share/doc/umplayer
+	rm -f debian/tmp/usr/share/doc/umplayer/Copying.txt
+
+override_dh_strip:
+	dh_strip --dbg-package=umplayer-dbg
+
+%:
+	dh $@
+
+get-orig-source:
+	rm -rf debian/tmp; mkdir debian/tmp
+	cd debian/tmp; wget https://github.com/minos-org/umplayer/archive/${DEB_MASTER_VERSION}.tar.gz
+	cd debian/tmp; tar xvzf ${DEB_MASTER_VERSION}.tar.gz
+	cd debian/tmp; mv umplayer-* umplayer-${DEB_UPSTREAM_VERSION}
+	cd debian/tmp; tar cvJf umplayer_${DEB_UPSTREAM_VERSION}.orig.tar.xz umplayer-${DEB_UPSTREAM_VERSION}
+	mv debian/tmp/umplayer_${DEB_UPSTREAM_VERSION}.orig.tar.xz .
+	mv debian/tmp/umplayer-${DEB_UPSTREAM_VERSION} .
+	rm -rf debian/tmp

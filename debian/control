@@ -1,7 +1,7 @@
 Source: umplayer
 Section: video
 Priority: optional
-Maintainer: Javier Lopez <chilicuil@ubuntu.com>
+Maintainer: Javier López <m@javier.io>
 Build-Depends: debhelper (>= 7.0.50~), libqt4-dev (>= 4.6.3), zlib1g-dev
 Standards-Version: 3.8.3
 Homepage: https://github.com/minos-org/umplayer

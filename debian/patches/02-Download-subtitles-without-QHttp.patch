@@ -1,0 +1,373 @@
+Description: Download subtitles without QHttp
+ QHttp was removed in Qt5. SimpleHttp keeps its interface over
+ QNetworkAccessManager; FileDownloader is the QNetworkAccessManager version that
+ smplayer 14.3 ships for the same reason.
+Forwarded: no
+
+diff --git a/src/findsubtitles/filedownloader/filedownloader.cpp b/src/findsubtitles/filedownloader/filedownloader.cpp
+index c875b85..621a57c 100644
+--- a/src/findsubtitles/filedownloader/filedownloader.cpp
++++ b/src/findsubtitles/filedownloader/filedownloader.cpp
+@@ -16,96 +16,79 @@
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+ 
+-/* Based on the Qt network/http example */
++/* QHttp left Qt in version 5: this is the QNetworkAccessManager version smplayer 14.3 ships */
+ 
+ #include "filedownloader.h"
+-#include <QHttp>
+-#include <QTimer>
+ 
+ FileDownloader::FileDownloader(QWidget *parent) : QProgressDialog(parent)
+ {
+-	http_get_id = -1;
+-	setMinimumDuration(0);
++	reply = 0;
++	manager = new QNetworkAccessManager(this);
++	connect(manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(gotResponse(QNetworkReply*)));
+ 
+-	http = new QHttp(this);
++	setMinimumDuration(0);
++	setRange(0,0);
+ 
+-	connect(http, SIGNAL(requestFinished(int, bool)),
+-            this, SLOT(httpRequestFinished(int, bool)));
+-	connect(http, SIGNAL(dataReadProgress(int, int)),
+-            this, SLOT(updateDataReadProgress(int, int)));
+-	connect(http, SIGNAL(responseHeaderReceived(const QHttpResponseHeader &)),
+-            this, SLOT(readResponseHeader(const QHttpResponseHeader &)));
+ 	connect(this, SIGNAL(canceled()), this, SLOT(cancelDownload()));
+ 
+ 	setWindowTitle(tr("Downloading..."));
+ }
+ 
+ FileDownloader::~FileDownloader() {
+-	//qDebug("FileDownloader::~FileDownloader");
+-	delete http;
++	delete manager;
+ }
+ 
+ void FileDownloader::setProxy(QNetworkProxy proxy) {
+-	http->abort();
+-	http->setProxy(proxy);
++	manager->setProxy(proxy);
+ 
+ 	qDebug("FileDownloader::setProxy: host: '%s' port: %d type: %d",
+            proxy.hostName().toUtf8().constData(), proxy.port(), proxy.type());
+ }
+ 
+ void FileDownloader::download(QUrl url) {
+-	QHttp::ConnectionMode mode = url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
+-	http->setHost(url.host(), mode, url.port() == -1 ? 0 : url.port());
+-    
+-	if (!url.userName().isEmpty())
+-		http->setUser(url.userName(), url.password());
+-
+-	http_request_aborted = false;
+-	http_get_id = http->get(url.path(), &buffer);
++	QNetworkRequest req(url);
++	req.setRawHeader("User-Agent", "UMPlayer");
++	reply = manager->get(req);
++	connect(reply, SIGNAL(downloadProgress(qint64, qint64)),
++            this, SLOT(updateDataReadProgress(qint64, qint64)));
+ 
+ 	setLabelText(tr("Downloading %1").arg(url.toString()));
+ }
+ 
+ void FileDownloader::cancelDownload() {
+-	http_request_aborted = true;
+-	http->abort();
++	if (reply) reply->abort();
+ }
+ 
+-void FileDownloader::httpRequestFinished(int request_id, bool error) {
+-	qDebug("FileDownloader::httpRequestFinished: request_id %d, error %d", request_id, error);
+-
+-	if (request_id != http_get_id) return;
++void FileDownloader::gotResponse(QNetworkReply* r) {
++	r->deleteLater();
++	if (r == reply) reply = 0;
+ 
+-	if (http_request_aborted) {
++	if (r->error() == QNetworkReply::OperationCanceledError) {
+ 		hide();
+ 		return;
+ 	}
+-
+-	hide();
+-
+-	if (error) {
+-		emit downloadFailed(http->errorString());
+-	} else {
+-		emit downloadFinished(buffer.data());
++	if (r->error() != QNetworkReply::NoError) {
++		hide();
++		emit downloadFailed(r->errorString());
++		return;
+ 	}
+-}
+ 
+-void FileDownloader::readResponseHeader(const QHttpResponseHeader &responseHeader) {
+-	if (responseHeader.statusCode() != 200) {
+-		emit downloadFailed(responseHeader.reasonPhrase());
+-		http_request_aborted = true;
+-		hide();
+-		http->abort();
++	int status = r->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
++	qDebug("FileDownloader::gotResponse: status: %d", status);
++	if (status == 301 || status == 302 || status == 307) {
++		download(r->url().resolved(r->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl()));
+ 		return;
+ 	}
+-}
+ 
+-void FileDownloader::updateDataReadProgress(int bytes_read, int total_bytes) {
+-	if (http_request_aborted) return;
++	hide();
++	emit downloadFinished(r->readAll());
++}
+ 
+-	setMaximum(total_bytes);
+-	setValue(bytes_read);
++void FileDownloader::updateDataReadProgress(qint64 bytes_read, qint64 total_bytes) {
++	if (total_bytes > -1) {
++		setMaximum(total_bytes);
++		setValue(bytes_read);
++	}
+ }
+ 
+ #include "moc_filedownloader.cpp"
+-
+diff --git a/src/findsubtitles/filedownloader/filedownloader.h b/src/findsubtitles/filedownloader/filedownloader.h
+index 8fd0863..a3ad47c 100644
+--- a/src/findsubtitles/filedownloader/filedownloader.h
++++ b/src/findsubtitles/filedownloader/filedownloader.h
+@@ -16,22 +16,20 @@
+     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+ 
+-/* Based on the Qt network/http example */
++/* QHttp left Qt in version 5: this is the QNetworkAccessManager version smplayer 14.3 ships */
+ 
+ #ifndef _FILEDOWNLOADER_H_
+ #define _FILEDOWNLOADER_H_
+ 
+ #include <QProgressDialog>
+ #include <QUrl>
+-#include <QBuffer>
+ #include <QNetworkProxy>
+-
+-class QHttp;
+-class QHttpResponseHeader;
++#include <QNetworkAccessManager>
++#include <QNetworkReply>
+ 
+ class FileDownloader : public QProgressDialog
+ {
+-    Q_OBJECT
++	Q_OBJECT
+ 
+ public:
+ 	FileDownloader(QWidget *parent = 0);
+@@ -48,15 +46,12 @@ signals:
+ 	void downloadFailed(const QString & reason);
+ 
+ private slots:
+-	void httpRequestFinished(int request_id, bool error);
+-	void readResponseHeader(const QHttpResponseHeader &responseHeader);
+-	void updateDataReadProgress(int bytes_read, int total_bytes);
++	void gotResponse(QNetworkReply* reply);
++	void updateDataReadProgress(qint64 bytes_read, qint64 total_bytes);
+ 
+ private:
+-	QHttp * http;
+-	int http_get_id;
+-	bool http_request_aborted;
+-	QBuffer buffer;
++	QNetworkAccessManager* manager;
++	QNetworkReply* reply;
+ };
+ 
+ #endif
+diff --git a/src/findsubtitles/simplehttp.cpp b/src/findsubtitles/simplehttp.cpp
+index 111c631..10a4569 100644
+--- a/src/findsubtitles/simplehttp.cpp
++++ b/src/findsubtitles/simplehttp.cpp
+@@ -18,64 +18,87 @@
+ 
+ #include "simplehttp.h"
+ #include <QUrl>
++#include <QNetworkRequest>
++#include <QNetworkReply>
+ 
+-SimpleHttp::SimpleHttp( QObject * parent ) : QHttp(parent)
++SimpleHttp::SimpleHttp( QObject * parent ) : QObject(parent)
+ {
+-	http_get_id = -1;
++	reply = 0;
++	manager = new QNetworkAccessManager(this);
++}
+ 
+-	connect( this, SIGNAL(requestFinished(int, bool)),
+-             this, SLOT(httpRequestFinished(int, bool)) );
++SimpleHttp::~SimpleHttp() {
++}
+ 
+-	connect( this, SIGNAL(responseHeaderReceived(const QHttpResponseHeader &)),
+-             this, SLOT(readResponseHeader(const QHttpResponseHeader &)) );
++void SimpleHttp::setProxy(const QNetworkProxy & proxy) {
++	manager->setProxy(proxy);
+ }
+ 
+-SimpleHttp::~SimpleHttp() {
++int SimpleHttp::state() const {
++	return reply ? 1 : 0;
++}
++
++void SimpleHttp::abort() {
++	if (!reply) return;
++
++	QNetworkReply * r = reply;
++	reply = 0;
++	r->disconnect(this);
++	r->abort();
++	r->deleteLater();
++	emit stateChanged(state());
+ }
+ 
+ void SimpleHttp::download(const QString & url) {
+-	downloaded_text.clear();
++	abort();
+ 
+ 	QUrl u(url);
+-	setHost( u.host() );
+-	http_get_id = get( u.path() );
++	QNetworkRequest req(u);
++	req.setRawHeader("User-Agent", "UMPlayer");
++	reply = manager->get(req);
++	connect( reply, SIGNAL(finished()), this, SLOT(replyFinished()) );
++	connect( reply, SIGNAL(downloadProgress(qint64, qint64)),
++             this, SLOT(replyProgress(qint64, qint64)) );
+ 
+ 	emit connecting(u.host());
++	emit stateChanged(state());
+ }
+ 
+-void SimpleHttp::readResponseHeader(const QHttpResponseHeader &responseHeader) {
+-	qDebug("SimpleHttp::readResponseHeader: statusCode: %d", responseHeader.statusCode());
+-
+-	if (responseHeader.statusCode() == 301)  {
+-		QString new_url = responseHeader.value("Location");
+-		qDebug("SimpleHttp::readResponseHeader: Location: '%s'", new_url.toLatin1().constData());
+-		download(new_url);
+-	}
+-	else
+-	if (responseHeader.statusCode() == 302)  {
+-		QString location = responseHeader.value("Location");
+-		qDebug("SimpleHttp::readResponseHeader: Location: '%s'", location.toLatin1().constData());
+-		http_get_id = get( location );
+-	}
+-	else
+-	if (responseHeader.statusCode() != 200) {
+-		qDebug("SimpleHttp::readResponseHeader: error: '%s'", responseHeader.reasonPhrase().toLatin1().constData());
+-		emit downloadFailed(responseHeader.reasonPhrase());
+-		abort();
+-	}
++void SimpleHttp::replyProgress(qint64 done, qint64 total) {
++	emit dataReadProgress((int) done, (int) total);
+ }
+ 
+-void SimpleHttp::httpRequestFinished(int request_id, bool error) {
+-	qDebug("SimpleHttp::httpRequestFinished: http_get_id: %d request_id: %d, error: %d", http_get_id, request_id, error);
++void SimpleHttp::replyFinished() {
++	QNetworkReply * r = reply;
++	if (!r) return;
++	reply = 0;
++	r->deleteLater();
++
++	int status = r->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
++	qDebug("SimpleHttp::replyFinished: statusCode: %d, error: %d", status, (int) r->error());
++
++	if (r->error() == QNetworkReply::NoError && (status == 301 || status == 302 || status == 307)) {
++		QUrl location = r->url().resolved(r->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl());
++		qDebug("SimpleHttp::replyFinished: Location: '%s'", location.toString().toLatin1().constData());
++		download(location.toString());
++		return;
++	}
+ 
+-    if (request_id != http_get_id) return;
++	emit stateChanged(state());
+ 
+-	downloaded_text += readAll();
++	if (r->error() != QNetworkReply::NoError) {
++		emit downloadFailed(r->errorString());
++		return;
++	}
++	if (status != 200) {
++		emit downloadFailed(r->attribute(QNetworkRequest::HttpReasonPhraseAttribute).toString());
++		return;
++	}
+ 
++	QByteArray downloaded_text = r->readAll();
+ 	if (!downloaded_text.isEmpty()) {
+ 		emit downloadFinished(downloaded_text);
+ 	}
+ }
+ 
+ #include "moc_simplehttp.cpp"
+-
+diff --git a/src/findsubtitles/simplehttp.h b/src/findsubtitles/simplehttp.h
+index bbd712a..453dfba 100644
+--- a/src/findsubtitles/simplehttp.h
++++ b/src/findsubtitles/simplehttp.h
+@@ -19,12 +19,15 @@
+ #ifndef _SIMPLEHTTP_H_
+ #define _SIMPLEHTTP_H_
+ 
+-#include <QHttp>
++#include <QObject>
++#include <QByteArray>
++#include <QNetworkAccessManager>
++#include <QNetworkProxy>
+ 
+-class QHttp;
+-class QHttpResponseHeader;
++class QNetworkReply;
+ 
+-class SimpleHttp : public QHttp
++/* QHttp left Qt in version 5: the same small interface over QNetworkAccessManager */
++class SimpleHttp : public QObject
+ {
+ 	Q_OBJECT
+ 
+@@ -33,20 +36,24 @@ public:
+ 	~SimpleHttp();
+ 
+ 	void download(const QString & url);
++	void abort();
++	void setProxy(const QNetworkProxy & proxy);
++	int state() const; //!< 0 idle, 1 while a request is in flight
+ 
+ signals:
+ 	void connecting(QString host);
+ 	void downloadFinished(QByteArray downloaded_text);
+ 	void downloadFailed(QString error);
++	void stateChanged(int state);
++	void dataReadProgress(int done, int total);
+ 
+ protected slots:
+-	void readResponseHeader(const QHttpResponseHeader &responseHeader);
+-	void httpRequestFinished(int request_id, bool error);
++	void replyFinished();
++	void replyProgress(qint64 done, qint64 total);
+ 
+ protected:
+-	QByteArray downloaded_text;
+-	int http_get_id;
++	QNetworkAccessManager * manager;
++	QNetworkReply * reply;
+ };
+ 
+ #endif
+-

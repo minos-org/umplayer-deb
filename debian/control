@@ -2,13 +2,14 @@ Source: umplayer
 Section: video
 Priority: optional
 Maintainer: Javier López <m@javier.io>
-Build-Depends: debhelper (>= 7.0.50~), libqt4-dev (>= 4.6.3), zlib1g-dev
+Build-Depends: debhelper (>= 7.0.50~), qtbase5-dev, qtbase5-private-dev, qttools5-dev-tools,
+ libgtk2.0-dev, libx11-dev, zlib1g-dev
 Standards-Version: 3.8.3
 Homepage: https://github.com/minos-org/umplayer
 
 Package: umplayer
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, mplayer2 | mplayer
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${qtbase:Abi}, mplayer2 | mplayer
 Recommends: umplayer-translations
 Description: complete front-end for MPlayer
  Qt Mplayer front-end, with basic features like playing

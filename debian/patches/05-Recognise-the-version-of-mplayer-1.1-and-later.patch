@@ -1,0 +1,57 @@
+Description: Recognise the version of mplayer 1.1 and later
+ The parser knew 1.0rc1 to 1.0rc3, SVN revisions and git builds. A release line
+ such as "MPlayer 1.3.0 (Debian), built with gcc-9" matched none of them, the
+ version stayed 0 and umplayer asked the user for it on the first file played.
+ Read the release number: 1.1 or later is newer than every revision asked about.
+Forwarded: no
+
+diff --git a/src/mplayerversion.cpp b/src/mplayerversion.cpp
+index 410f4c2..25629ad 100644
+--- a/src/mplayerversion.cpp
++++ b/src/mplayerversion.cpp
+@@ -30,6 +30,8 @@ int MplayerVersion::mplayerVersion(QString string) {
+ 	static QRegExp rx_mplayer_revision("^MPlayer (.*)-r(\\d+)(.*)");
+ 	static QRegExp rx_mplayer_version("^MPlayer ([a-z,0-9,.]+)-(.*)");
+ 	static QRegExp rx_mplayer_git("^MPlayer GIT(.*)");
++	// a release by its number: "MPlayer 1.3.0 (Debian), built with gcc-9", "MPlayer 1.5+svn38446-1build5 (Debian)"
++	static QRegExp rx_mplayer_release("^MPlayer (\\d+)\\.(\\d+)[\\.\\d]*([^a-z\\d\\.]|$)");
+ #ifndef Q_OS_WIN
+ 	static QRegExp rx_mplayer_version_ubuntu("^MPlayer (\\d):(\\d)\\.(\\d)~(.*)");
+ #endif
+@@ -59,6 +61,14 @@ int MplayerVersion::mplayerVersion(QString string) {
+ 		qDebug("MplayerVersion::mplayerVersion: MPlayer SVN revision found: %d", mplayer_svn);
+ 	} 
+ 	else
++	if (rx_mplayer_release.indexIn(string) > -1 &&
++	    (rx_mplayer_release.cap(1).toInt() > 1 || rx_mplayer_release.cap(2).toInt() >= 1)) {
++		// 1.1 and every release after it is newer than any revision this code asks about
++		qDebug("MplayerVersion::mplayerVersion: MPlayer release %s.%s found, taken as 1.1 or later",
++		       rx_mplayer_release.cap(1).toUtf8().data(), rx_mplayer_release.cap(2).toUtf8().data());
++		mplayer_svn = MPLAYER_1_1_SVN;
++	}
++	else
+ 	if (rx_mplayer_version.indexIn(string) > -1) {
+ 		QString version = rx_mplayer_version.cap(1);
+ 		qDebug("MplayerVersion::mplayerVersion: MPlayer version found: %s", version.toUtf8().data());
+@@ -130,6 +140,7 @@ QString MplayerVersion::toString(int svn_revision) {
+ 		case MPLAYER_1_0_RC1_SVN: version = QString("1.0rc1"); break;
+ 		case MPLAYER_1_0_RC2_SVN: version = QString("1.0rc2"); break;
+ 		case MPLAYER_1_0_RC3_SVN: version = QString("1.0rc3"); break;
++		case MPLAYER_1_1_SVN: version = QString("1.1 or later"); break;
+ 		default : version =  QString("SVN r%1").arg(svn_revision);
+ 	}
+ 
+diff --git a/src/mplayerversion.h b/src/mplayerversion.h
+index 446d712..ef01b25 100644
+--- a/src/mplayerversion.h
++++ b/src/mplayerversion.h
+@@ -29,6 +29,9 @@
+ // mplayer 1.0rc3 is released
+ #define MPLAYER_1_0_RC3_SVN 29073
+ 
++// the revision mplayer 1.1 was released from; later releases are told apart no further
++#define MPLAYER_1_1_SVN 34992
++
+ class MplayerVersion {
+ public:
+ 

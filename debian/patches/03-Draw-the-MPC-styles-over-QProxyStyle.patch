@@ -1,0 +1,105 @@
+Description: Draw the MPC styles over QProxyStyle
+ QWindowsStyle is private in Qt5; the Windows style is still reachable through
+ QStyleFactory, and the qDraw* helpers through qdrawutil.h.
+Forwarded: no
+
+diff --git a/src/mpcgui/mpcstyles.cpp b/src/mpcgui/mpcstyles.cpp
+index bf94232..105c5d1 100644
+--- a/src/mpcgui/mpcstyles.cpp
++++ b/src/mpcgui/mpcstyles.cpp
+@@ -18,10 +18,10 @@
+ 
+ #include "mpcstyles.h"
+ 
+-#include <QWindowsStyle>
+ #include <QStyleOptionToolBar>
+ #include <QSlider>
+ #include <QPainter>
++#include <qdrawutil.h>
+ 
+ 
+ void
+@@ -78,13 +78,13 @@ MpcToolbarStyle::drawControl(ControlElement control, const QStyleOption *option,
+             }
+             else
+             {
+-                QWindowsStyle::drawControl(control,toolbar, painter, widget);
++                QProxyStyle::drawControl(control,toolbar, painter, widget);
+             }
+         }
+     }
+     else
+     {
+-        QWindowsStyle::drawControl(control,option, painter, widget);
++        QProxyStyle::drawControl(control,option, painter, widget);
+     }
+ }
+ 
+@@ -163,7 +163,7 @@ void MpcVolumeSlideStyle::drawComplexControl(ComplexControl cc, const QStyleOpti
+     }
+     else
+     {
+-        QWindowsStyle::drawComplexControl(cc,opt,p,widget);
++        QProxyStyle::drawComplexControl(cc,opt,p,widget);
+     }
+ }
+ 
+@@ -233,7 +233,7 @@ void MpcTimeSlideStyle::drawComplexControl(ComplexControl cc, const QStyleOption
+     }
+     else
+     {
+-        QWindowsStyle::drawComplexControl(cc,opt,p,widget);
++        QProxyStyle::drawComplexControl(cc,opt,p,widget);
+     }
+ }
+ 
+diff --git a/src/mpcgui/mpcstyles.h b/src/mpcgui/mpcstyles.h
+index 3658716..41a75ab 100644
+--- a/src/mpcgui/mpcstyles.h
++++ b/src/mpcgui/mpcstyles.h
+@@ -19,37 +19,38 @@
+ #ifndef _MPC_STYLES_H_
+ #define _MPC_STYLES_H_
+ 
+-#include <QWindowsStyle>
++#include <QProxyStyle>
++#include <QStyleFactory>
+ #include <QStyleOptionToolBar>
+ 
+ enum QSliderDirection { SlUp, SlDown, SlLeft, SlRight };
+ 
+-class MpcToolbarStyle : public QWindowsStyle
++class MpcToolbarStyle : public QProxyStyle
+ {
+     Q_OBJECT
+ 
+ public:
+-    MpcToolbarStyle() {};
++    MpcToolbarStyle() : QProxyStyle(QStyleFactory::create("Windows")) {};
+     void drawControl(ControlElement control, const QStyleOption *option,
+                       QPainter *painter, const QWidget *widget) const;
+ };
+ 
+-class MpcTimeSlideStyle : public QWindowsStyle
++class MpcTimeSlideStyle : public QProxyStyle
+ {
+     Q_OBJECT
+ 
+ public:
+-    MpcTimeSlideStyle() {};
++    MpcTimeSlideStyle() : QProxyStyle(QStyleFactory::create("Windows")) {};
+     void drawComplexControl(ComplexControl cc, const QStyleOptionComplex *opt,
+                                        QPainter *p, const QWidget *widget) const;
+ };
+ 
+-class MpcVolumeSlideStyle : public QWindowsStyle
++class MpcVolumeSlideStyle : public QProxyStyle
+ {
+     Q_OBJECT
+ 
+ public:
+-    MpcVolumeSlideStyle() {};
++    MpcVolumeSlideStyle() : QProxyStyle(QStyleFactory::create("Windows")) {};
+     void drawComplexControl(ComplexControl cc, const QStyleOptionComplex *opt,
+                                        QPainter *p, const QWidget *widget) const;
+ };

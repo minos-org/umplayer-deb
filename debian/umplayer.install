@@ -1,5 +1,6 @@
 umplayer*.desktop usr/share/applications
 debian/tmp/usr/bin/umplayer
+debian/tmp/usr/lib/umplayer
 debian/tmp/usr/share/icons
 debian/tmp/usr/share/man
 debian/tmp/usr/share/umplayer/shortcuts

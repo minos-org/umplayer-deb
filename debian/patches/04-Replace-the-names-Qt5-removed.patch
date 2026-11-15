@@ -1,0 +1,853 @@
+Description: Replace the names Qt5 removed
+ TRUE/FALSE, QString::toAscii, QHeaderView::setResizeMode, qVariantValue,
+ qInstallMsgHandler, QTextCodec::setCodecForCStrings, QMouseEvent::posF,
+ QInputDialog::getInteger, QCoreApplication::CodecForTr, QWidget::setShown,
+ QUrl::queryItemValue, QFlags of a QFlags, and the includes that came for free
+ with QtGui. Q_WS_X11 is never defined in Qt5, which silently dropped
+ -stop-xscreensaver: test the platform instead.
+Forwarded: no
+
+diff --git a/src/actionseditor.cpp b/src/actionseditor.cpp
+index a12e760..7a13cba 100644
+--- a/src/actionseditor.cpp
++++ b/src/actionseditor.cpp
+@@ -151,8 +151,8 @@ ActionsEditor::ActionsEditor(QWidget * parent, Qt::WindowFlags f)
+ 	actionsTable->setSelectionMode( QAbstractItemView::SingleSelection );
+ 	actionsTable->verticalHeader()->hide();
+ 
+-	actionsTable->horizontalHeader()->setResizeMode(COL_DESC, QHeaderView::Stretch);
+-	actionsTable->horizontalHeader()->setResizeMode(COL_NAME, QHeaderView::Stretch);
++	actionsTable->horizontalHeader()->setSectionResizeMode(COL_DESC, QHeaderView::Stretch);
++	actionsTable->horizontalHeader()->setSectionResizeMode(COL_NAME, QHeaderView::Stretch);
+ 
+ 	actionsTable->setAlternatingRowColors(true);
+ #if USE_SHORTCUTGETTER
+diff --git a/src/basegui.cpp b/src/basegui.cpp
+index a2372bf..9c6f7df 100644
+--- a/src/basegui.cpp
++++ b/src/basegui.cpp
+@@ -36,6 +36,7 @@
+ #include <QUrl>
+ #include <QDragEnterEvent>
+ #include <QDropEvent>
++#include <QMimeData>
+ #include <QDesktopServices>
+ #include <QInputDialog>
+ #include <QNetworkAccessManager>
+@@ -1246,14 +1247,14 @@ void BaseGui::createActions() {
+ 		for (int n = 0; n < display_devices.count(); n++) {
+ 			int id = display_devices[n].ID().toInt();
+ 			QString desc = display_devices[n].desc();
+-			MyAction * screen_item = new MyActionGroupItem(this, screenGroup, QString("screen_%1").arg(n).toAscii().constData(), id);
++			MyAction * screen_item = new MyActionGroupItem(this, screenGroup, QString("screen_%1").arg(n).toLatin1().constData(), id);
+ 			screen_item->change( "&"+QString::number(n) + " - " + desc);
+ 		}
+ 	}
+ 	else
+ #endif // Q_OS_WIN
+ 	for (int n = 1; n <= 4; n++) {
+-		MyAction * screen_item = new MyActionGroupItem(this, screenGroup, QString("screen_%1").arg(n).toAscii().constData(), n);
++		MyAction * screen_item = new MyActionGroupItem(this, screenGroup, QString("screen_%1").arg(n).toLatin1().constData(), n);
+ 		screen_item->change( "&"+QString::number(n) );
+ 	}
+ 
+@@ -2379,7 +2380,7 @@ void BaseGui::createPanel() {
+         panel->setFocusPolicy( Qt::StrongFocus );
+ 
+ 	// panel
+-	panel->setAutoFillBackground(TRUE);
++	panel->setAutoFillBackground(true);
+ 	ColorUtils::setBackgroundColor( panel, QColor(0,0,0) );
+ }
+ 
+@@ -2721,7 +2722,7 @@ void BaseGui::createMenus() {
+         QDir skin_dir = Paths::configPath() + "/themes";
+         QStringList skins = skin_dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+         for (int n=0; n < skins.count(); n++) {
+-                skinMenu->addAction(new MyActionGroupItem(this, skinGroup, skins[n], skins[n].toAscii().constData()  ));
++                skinMenu->addAction(new MyActionGroupItem(this, skinGroup, skins[n], skins[n].toLatin1().constData()  ));
+                 if(pref->skin == skins[n])
+                     skinMenu->actions().last()->setChecked(true);
+         }
+@@ -2730,7 +2731,7 @@ void BaseGui::createMenus() {
+         QStringList skins2 = skin_dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+         for (int n=0; n < skins2.count(); n++) {
+                 if (!skins.contains(skins2[n] ) ) {
+-                        skinMenu->addAction(new MyActionGroupItem(this, skinGroup, skins2[n], skins2[n].toAscii().constData()  ));
++                        skinMenu->addAction(new MyActionGroupItem(this, skinGroup, skins2[n], skins2[n].toLatin1().constData()  ));
+                         if(pref->skin == skins2[n])
+                             skinMenu->actions().last()->setChecked(true);
+                 }
+@@ -3082,7 +3083,7 @@ void BaseGui::applyFileProperties() {
+ 
+ #undef TEST_AND_SET
+ #define TEST_AND_SET( Pref, Dialog ) \
+-	if ( Pref != Dialog ) { Pref = Dialog; need_restart = TRUE; }
++	if ( Pref != Dialog ) { Pref = Dialog; need_restart = true; }
+ 
+ 	QString prev_demuxer = core->mset.forced_demuxer;
+ 
+@@ -4498,14 +4499,14 @@ void BaseGui::wheelEvent( QWheelEvent * e ) {
+ // Called when a video has started to play
+ void BaseGui::enterFullscreenOnPlay() {
+ 	if ( (pref->start_in_fullscreen) && (!pref->fullscreen) ) {
+-		toggleFullscreen(TRUE);
++		toggleFullscreen(true);
+ 	}
+ }
+ 
+ // Called when the playlist has stopped
+ void BaseGui::exitFullscreenOnStop() {
+     if (pref->fullscreen) {
+-		toggleFullscreen(FALSE);
++		toggleFullscreen(false);
+ 	}
+ }
+ 
+@@ -4764,7 +4765,7 @@ void BaseGui::toggleStayOnTop() {
+ void BaseGui::exitFullscreenIfNeeded() {
+ 	/*
+ 	if (pref->fullscreen) {
+-		toggleFullscreen(FALSE);
++		toggleFullscreen(false);
+ 	}
+ 	*/
+ }
+diff --git a/src/core.cpp b/src/core.cpp
+index 44dfb98..8e1da96 100644
+--- a/src/core.cpp
++++ b/src/core.cpp
+@@ -548,7 +548,7 @@ void Core::openDVD( bool from_folder, QString directory) {
+ 			QFileInfo fi(directory);
+ 			if ( (fi.exists()) && (fi.isDir()) ) {
+ 				pref->dvd_directory = directory;
+-				pref->play_dvd_from_hd = TRUE;
++				pref->play_dvd_from_hd = true;
+ 				openDVD();
+ 			} else {
+ 				qDebug("Core::openDVD: directory '%s' is not valid", directory.toUtf8().data());
+@@ -557,7 +557,7 @@ void Core::openDVD( bool from_folder, QString directory) {
+ 			qDebug("Core::openDVD: directory is empty");
+ 		}
+ 	} else {
+-		pref->play_dvd_from_hd = FALSE;
++		pref->play_dvd_from_hd = false;
+ 		openDVD();
+ 	}
+ }
+@@ -876,7 +876,7 @@ void Core::initPlaying(int seek) {
+ 
+ 	/* updateWidgets(); */
+ 
+-	mplayerwindow->showLogo(FALSE);
++	mplayerwindow->showLogo(false);
+ 
+ 	if (proc->isRunning()) {
+ 		stopMplayer();
+@@ -969,7 +969,7 @@ void Core::newMediaPlaying() {
+ 		mset.current_chapter_id = firstChapter();
+ 	}
+ 
+-	mdat.initialized = TRUE;
++	mdat.initialized = true;
+ 
+ 	// MPlayer doesn't display the length in ID_LENGTH for audio CDs...
+ 	if ((mdat.duration == 0) && (mdat.type == TYPE_AUDIO_CD)) {
+@@ -1576,7 +1576,7 @@ void Core::startMplayer( QString file, double seek ) {
+ 	}
+ #endif
+ 
+-#ifdef Q_WS_X11
++#if defined(Q_OS_UNIX) && !defined(Q_OS_MACX) /* Q_WS_X11 is gone in Qt5 */
+ 	if (pref->disable_screensaver) {
+ 		proc->addArgument("-stop-xscreensaver");
+ 	} else {
+@@ -3479,7 +3479,7 @@ void Core::nextWheelFunction() {
+ 		if(a==32)
+ 			a = 2;
+ 		// See if we are done
+-		if(pref->wheel_function_cycle.testFlag(QFlag(a)))
++		if(pref->wheel_function_cycle.testFlag((Preferences::WheelFunction) a))
+ 			done = true;
+ 	}
+ 	pref->wheel_function = a;
+@@ -3818,7 +3818,7 @@ void Core::gotNoVideo() {
+ 	mplayerwindow->setResolution( mset.win_width, mset.win_height );
+ 	emit needResize( mset.win_width, mset.win_height );
+ 	*/
+-	//mplayerwindow->showLogo(TRUE);
++	//mplayerwindow->showLogo(true);
+ 	emit noVideo();
+ }
+ 
+diff --git a/src/defaultgui.cpp b/src/defaultgui.cpp
+index c35132a..ea05983 100644
+--- a/src/defaultgui.cpp
++++ b/src/defaultgui.cpp
+@@ -307,7 +307,7 @@ void DefaultGui::createStatusBar() {
+ 	frame_display->setText("88888888");
+ 	frame_display->setMinimumSize(frame_display->sizeHint());
+ 
+-	statusBar()->setAutoFillBackground(TRUE);
++	statusBar()->setAutoFillBackground(true);
+ 
+ 	ColorUtils::setBackgroundColor( statusBar(), QColor(0,0,0) );
+ 	ColorUtils::setForegroundColor( statusBar(), QColor(255,255,255) );
+@@ -315,7 +315,7 @@ void DefaultGui::createStatusBar() {
+ 	ColorUtils::setForegroundColor( time_display, QColor(255,255,255) );
+ 	ColorUtils::setBackgroundColor( frame_display, QColor(0,0,0) );
+ 	ColorUtils::setForegroundColor( frame_display, QColor(255,255,255) );
+-	statusBar()->setSizeGripEnabled(FALSE);
++	statusBar()->setSizeGripEnabled(false);
+ 
+     statusBar()->showMessage( tr("Welcome to UMPlayer") );
+ 	statusBar()->addPermanentWidget( frame_display, 0 );
+diff --git a/src/downloadfile.cpp b/src/downloadfile.cpp
+index 3c7ea4e..3da7936 100644
+--- a/src/downloadfile.cpp
++++ b/src/downloadfile.cpp
+@@ -39,7 +39,7 @@ QObject(parent), speed(0)
+ 
+ void DownloadFile::getRequest(QString url)
+ {
+-        QUrl realUrl = QUrl::fromEncoded(url.toAscii(), QUrl::StrictMode);
++        QUrl realUrl = QUrl::fromEncoded(url.toLatin1(), QUrl::StrictMode);
+         getRequest(realUrl);
+ }
+ 
+diff --git a/src/favoriteeditor.cpp b/src/favoriteeditor.cpp
+index 67f1ad2..b6c3e3b 100644
+--- a/src/favoriteeditor.cpp
++++ b/src/favoriteeditor.cpp
+@@ -36,7 +36,7 @@ FavoriteEditor::FavoriteEditor( QWidget* parent, Qt::WindowFlags f )
+ 	table->setHorizontalHeaderLabels(QStringList() << tr("Icon") << tr("Name") << tr("Media") );
+ 
+ 	table->setAlternatingRowColors(true);
+-	table->horizontalHeader()->setResizeMode(COL_FILE, QHeaderView::Stretch);
++	table->horizontalHeader()->setSectionResizeMode(COL_FILE, QHeaderView::Stretch);
+ 
+ 	table->setSelectionBehavior(QAbstractItemView::SelectRows);
+ 	table->setSelectionMode(QAbstractItemView::ExtendedSelection);
+diff --git a/src/favorites.cpp b/src/favorites.cpp
+index 37c597e..70ddc53 100644
+--- a/src/favorites.cpp
++++ b/src/favorites.cpp
+@@ -252,7 +252,7 @@ void Favorites::jump() {
+ 	qDebug("Favorites::jump");
+ 
+ 	bool ok;
+-	int item = QInputDialog::getInteger(parent_widget, tr("Jump to item"),
++	int item = QInputDialog::getInt(parent_widget, tr("Jump to item"),
+                           tr("Enter the number of the item in the list to jump:"), 
+                           last_item, 1, f_list.count(), 1, &ok);
+ 	if (ok) {
+diff --git a/src/filepropertiesdialog.cpp b/src/filepropertiesdialog.cpp
+index 02c2ea0..b437246 100644
+--- a/src/filepropertiesdialog.cpp
++++ b/src/filepropertiesdialog.cpp
+@@ -37,7 +37,7 @@ FilePropertiesDialog::FilePropertiesDialog( QWidget* parent, Qt::WindowFlags f )
+ 	applyButton = buttonBox->button(QDialogButtonBox::Apply);
+ 	connect( applyButton, SIGNAL(clicked()), this, SLOT(apply()) );
+ 
+-	codecs_set = FALSE;
++	codecs_set = false;
+ 
+ 	// Read codec info from InfoReader:
+ 	InfoReader *i = InfoReader::obj();
+@@ -112,7 +112,7 @@ void FilePropertiesDialog::setCodecs(InfoList vc, InfoList ac, InfoList demuxer)
+ 		demuxer_listbox->addItem( (*it).name() +" - "+ (*it).desc() );
+ 	}
+ 
+-	codecs_set = TRUE;	
++	codecs_set = true;	
+ }
+ 
+ void FilePropertiesDialog::setDemuxer(QString demuxer, QString original_demuxer) {
+diff --git a/src/helper.cpp b/src/helper.cpp
+index 01ff5e9..c5612f3 100644
+--- a/src/helper.cpp
++++ b/src/helper.cpp
+@@ -151,10 +151,10 @@ bool Helper::directoryContainsDVD(QString directory) {
+ 
+ 	QDir dir(directory);
+ 	QStringList l = dir.entryList();
+-	bool valid = FALSE;
++	bool valid = false;
+ 	for (int n=0; n < l.count(); n++) {
+ 		//qDebug("  * entry %d: '%s'", n, l[n].toUtf8().data());
+-		if (l[n].toLower() == "video_ts") valid = TRUE;
++		if (l[n].toLower() == "video_ts") valid = true;
+ 	}
+ 
+ 	return valid;
+diff --git a/src/infofile.cpp b/src/infofile.cpp
+index 3f13a9c..3ec0dbd 100644
+--- a/src/infofile.cpp
++++ b/src/infofile.cpp
+@@ -218,6 +218,6 @@ QString InfoFile::addItem( QString tag, QString value ) {
+ 
+ 
+ inline QString InfoFile::tr( const char * sourceText, const char * comment, int n )  {
+-	return QCoreApplication::translate("InfoFile", sourceText, comment, QCoreApplication:: CodecForTr, n );
++	return QCoreApplication::translate("InfoFile", sourceText, comment, n );
+ }
+ 
+diff --git a/src/inforeader.cpp b/src/inforeader.cpp
+index 393dacb..69e987a 100644
+--- a/src/inforeader.cpp
++++ b/src/inforeader.cpp
+@@ -72,7 +72,7 @@ InfoReader::~InfoReader() {
+ }
+ 
+ void InfoReader::getInfo() {
+-	waiting_for_key = TRUE;
++	waiting_for_key = true;
+ 	vo_list.clear();
+ 	ao_list.clear();
+ 	demuxer_list.clear();
+@@ -176,31 +176,31 @@ void InfoReader::readLine(QByteArray ba) {
+ 
+ 	if ( rx_vo_key.indexIn(line) > -1 ) {
+ 		reading_type = VO;
+-		waiting_for_key = FALSE;
++		waiting_for_key = false;
+ 		qDebug("InfoReader::readLine: found key: vo");
+ 	}
+ 
+ 	if ( rx_ao_key.indexIn(line) > -1 ) {
+ 		reading_type = AO;
+-		waiting_for_key = FALSE;
++		waiting_for_key = false;
+ 		qDebug("InfoReader::readLine: found key: ao");
+ 	}
+ 
+ 	if ( rx_demuxer_key.indexIn(line) > -1 ) {
+ 		reading_type = DEMUXER;
+-		waiting_for_key = FALSE;
++		waiting_for_key = false;
+ 		qDebug("InfoReader::readLine: found key: demuxer");
+ 	}
+ 
+ 	if ( rx_ac_key.indexIn(line) > -1 ) {
+ 		reading_type = AC;
+-		waiting_for_key = FALSE;
++		waiting_for_key = false;
+ 		qDebug("InfoReader::readLine: found key: ac");
+ 	}
+ 
+ 	if ( rx_vc_key.indexIn(line) > -1 ) {
+ 		reading_type = VC;
+-		waiting_for_key = FALSE;
++		waiting_for_key = false;
+ 		qDebug("InfoReader::readLines: found key: vc");
+ 	}
+ 
+diff --git a/src/main.cpp b/src/main.cpp
+index a954040..59116fa 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -50,7 +50,7 @@ using namespace Global;
+ 
+ BaseGui * basegui_instance = 0;
+ 
+-void myMessageOutput( QtMsgType type, const char *msg ) {
++void myMessageOutput( QtMsgType type, const QMessageLogContext &, const QString & msg ) {
+ 	static QStringList saved_lines;
+ 	static QString orig_line;
+ 	static QString line2;
+@@ -65,7 +65,7 @@ void myMessageOutput( QtMsgType type, const char *msg ) {
+ 
+ 	line2.clear();
+ 
+-	orig_line = QString::fromUtf8(msg);
++	orig_line = msg;
+ 
+ 	switch ( type ) {
+ 		case QtDebugMsg:
+@@ -186,7 +186,7 @@ int main( int argc, char ** argv )
+ 		}
+ 	}
+ 
+-    qInstallMsgHandler( myMessageOutput );
++    qInstallMessageHandler( myMessageOutput );
+ 
+ #if USE_LOCKS
+ 	//setIniPath will be set later in global_init, but we need it here
+@@ -255,7 +255,6 @@ int main( int argc, char ** argv )
+ #endif
+ 		return c;
+ 	}
+-        QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+         basegui_instance = umplayer->gui();
+         a.connect(umplayer->gui(), SIGNAL(quitSolicited()), &a, SLOT(quit()));
+         umplayer->start();
+diff --git a/src/mediadata.cpp b/src/mediadata.cpp
+index 076b412..935fbdd 100644
+--- a/src/mediadata.cpp
++++ b/src/mediadata.cpp
+@@ -35,7 +35,7 @@ void MediaData::reset() {
+ 	type = TYPE_UNKNOWN;
+ 	duration=0;
+ 
+-	novideo = FALSE;
++	novideo = false;
+ 
+ 	video_width=0;
+     video_height=0;
+diff --git a/src/mediapanel.h b/src/mediapanel.h
+index 339e0ac..9257f01 100644
+--- a/src/mediapanel.h
++++ b/src/mediapanel.h
+@@ -1,7 +1,7 @@
+ #ifndef MEDIAPANEL_H
+ #define MEDIAPANEL_H
+ 
+-#include <QtGui/QWidget>
++#include <QWidget>
+ #include <QPixmap>
+ #include <QLabel>
+ #include "ui_mediapanel.h"
+diff --git a/src/mediasettings.cpp b/src/mediasettings.cpp
+index c7a18a2..bd1bc97 100644
+--- a/src/mediasettings.cpp
++++ b/src/mediasettings.cpp
+@@ -46,7 +46,7 @@ void MediaSettings::reset() {
+ 
+ 	aspect_ratio_id = AspectAuto;
+ 
+-	//fullscreen = FALSE;
++	//fullscreen = false;
+ 	volume = pref->initial_volume;
+ 	mute = false;
+ 	external_subtitles = "";
+diff --git a/src/mpcgui/mpcgui.cpp b/src/mpcgui/mpcgui.cpp
+index ff85b6e..db769a5 100644
+--- a/src/mpcgui/mpcgui.cpp
++++ b/src/mpcgui/mpcgui.cpp
+@@ -420,7 +420,7 @@ void MpcGui::createStatusBar() {
+ 	frame_display->setMinimumSize(frame_display->sizeHint());
+     frame_display->setContentsMargins(15,2,1,1);
+ 
+-	statusBar()->setAutoFillBackground(TRUE);
++	statusBar()->setAutoFillBackground(true);
+ 
+ 	ColorUtils::setBackgroundColor( statusBar(), QColor(0,0,0) );
+ 	ColorUtils::setForegroundColor( statusBar(), QColor(255,255,255) );
+@@ -430,7 +430,7 @@ void MpcGui::createStatusBar() {
+ 	ColorUtils::setForegroundColor( frame_display, QColor(255,255,255) );
+ 	ColorUtils::setBackgroundColor( audiochannel_display, QColor(0,0,0) );
+ 	ColorUtils::setForegroundColor( audiochannel_display, QColor(255,255,255) );
+-	statusBar()->setSizeGripEnabled(FALSE);
++	statusBar()->setSizeGripEnabled(false);
+ 
+ 
+ 
+diff --git a/src/mplayerprocess.cpp b/src/mplayerprocess.cpp
+index b801d2b..28bbf3a 100644
+--- a/src/mplayerprocess.cpp
++++ b/src/mplayerprocess.cpp
+@@ -308,7 +308,7 @@ void MplayerProcess::parseLine(QByteArray ba) {
+ #if !CHECK_VIDEO_CODEC_FOR_NO_VIDEO
+ 		// No video
+ 		if (rx_novideo.indexIn(line) > -1) {
+-			md.novideo = TRUE;
++			md.novideo = true;
+ 			emit receivedNoVideo();
+ 			//emit mplayerFullyLoaded();
+ 		}
+diff --git a/src/mplayerwindow.cpp b/src/mplayerwindow.cpp
+index 3d824c5..b4dd778 100644
+--- a/src/mplayerwindow.cpp
++++ b/src/mplayerwindow.cpp
+@@ -56,7 +56,7 @@ using namespace Global;
+ Screen::Screen(QWidget* parent)
+     :owner(parent)
+ {
+-        owner->setMouseTracking(TRUE);
++        owner->setMouseTracking(true);
+         owner->setFocusPolicy( Qt::NoFocus );
+         owner->setMinimumSize( QSize(0,0) );
+ 
+@@ -232,7 +232,7 @@ void MplayerLayer::updateView()
+ void MplayerLayer::setSharedMemory(QString memoryName)
+ {
+     makeCurrent();
+-    startObjcFunction(memoryName.toAscii().data());
++    startObjcFunction(memoryName.toLatin1().data());
+     //cleararea_bridge();
+     QTimer::singleShot(0, this, SLOT(cleararea_slot()));
+ }
+@@ -378,14 +378,14 @@ MplayerWindow::MplayerWindow(QWidget* parent, Qt::WindowFlags f )
+ 	setAutoFillBackground(true);
+         ColorUtils::setBackgroundColor( this, QColor(0,0,0) );
+         mplayerlayer = new MplayerLayer( this );
+-        mplayerlayer->setAutoFillBackground(TRUE);
++        mplayerlayer->setAutoFillBackground(true);
+         mplayerlayer->hide();
+ 
+         logo = new PictureViewer( mplayerlayer );
+         fontScanView = new NonScrollTextView(mplayerlayer);
+         loadingAnimation = new AnimationViewer(mplayerlayer);
+ 
+-        loadingAnimation->setAutoFillBackground(TRUE);
++        loadingAnimation->setAutoFillBackground(true);
+         fontScanView->setAutoFillBackground(true);
+ #if QT_VERSION >= 0x040400
+ 	logo->setAttribute(Qt::WA_NativeWindow); // Otherwise the logo is not visible in Qt 4.4
+diff --git a/src/myclient.h b/src/myclient.h
+index 4c07b3e..cd2fd66 100644
+--- a/src/myclient.h
++++ b/src/myclient.h
+@@ -21,6 +21,7 @@
+ #define _MYCLIENT_H_
+ 
+ #include <QStringList>
++#include <QObject>
+ 
+ class QTextStream;
+ class QTcpSocket;
+diff --git a/src/panelseeker.cpp b/src/panelseeker.cpp
+index f474850..22d40fe 100644
+--- a/src/panelseeker.cpp
++++ b/src/panelseeker.cpp
+@@ -106,7 +106,7 @@ void PanelSeeker::mousePressEvent(QMouseEvent *m)
+     setTracking(pref->update_while_seeking);
+     if(m->button() == Qt::LeftButton)
+     {
+-        QPointF pos = m->posF();
++        QPointF pos = m->localPos();
+         if(knobRect.contains(pos))
+         {
+             isPressed = true;
+@@ -118,7 +118,7 @@ void PanelSeeker::mousePressEvent(QMouseEvent *m)
+         else
+         {
+             isPressed = false;
+-            knobAdjust( m->posF().x() - knobRect.center().x(), true);
++            knobAdjust( m->localPos().x() - knobRect.center().x(), true);
+         }
+     }
+ }
+@@ -128,7 +128,7 @@ void PanelSeeker::mouseMoveEvent(QMouseEvent *m)
+     m->accept();
+     if(isPressed)
+     {
+-        knobAdjust(m->posF().x() - knobRect.center().x() - mousePressDifference );        
++        knobAdjust(m->localPos().x() - knobRect.center().x() - mousePressDifference );        
+     }
+ }
+ 
+@@ -143,7 +143,7 @@ void PanelSeeker::mouseReleaseEvent(QMouseEvent *m)
+         freezeTimer->start();
+         /*if(mousePressPos == m->pos())
+         {            
+-            knobAdjust( m->posF().x() - knobRect.center().x(), true);
++            knobAdjust( m->localPos().x() - knobRect.center().x(), true);
+             triggerAction(SliderMove);
+         } */
+     }
+diff --git a/src/playlist.cpp b/src/playlist.cpp
+index f7d42a6..0d60840 100644
+--- a/src/playlist.cpp
++++ b/src/playlist.cpp
+@@ -38,6 +38,7 @@
+ #include <QDragEnterEvent>
+ #include <QDropEvent>
+ #include <QHeaderView>
++#include <QMimeData>
+ #include <QTextCodec>
+ #include <QApplication>
+ #include <QLabel>
+@@ -163,11 +164,11 @@ void Playlist::createTable() {
+         pal.setColor(QPalette::AlternateBase, QColor("#f0f6ff"));
+         pal.setColor(QPalette::Base, Qt::white);
+         listView->setPalette(pal);
+-        listView->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+-        listView->horizontalHeader()->setResizeMode(COL_NAME, QHeaderView::Stretch);
++        listView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
++        listView->horizontalHeader()->setSectionResizeMode(COL_NAME, QHeaderView::Stretch);
+         /*
+-	listView->horizontalHeader()->setResizeMode(COL_TIME, QHeaderView::ResizeToContents);
+-	listView->horizontalHeader()->setResizeMode(COL_PLAY, QHeaderView::ResizeToContents);
++	listView->horizontalHeader()->setSectionResizeMode(COL_TIME, QHeaderView::ResizeToContents);
++	listView->horizontalHeader()->setSectionResizeMode(COL_PLAY, QHeaderView::ResizeToContents);
+ 	*/
+         listView->setIconSize( QPixmap(":/Playlist/ok.png").size() );
+ 
+@@ -405,7 +406,7 @@ void Playlist::setCurrentItem(int current) {
+ 	current_item = current;
+ 
+ 	if ((current_item > -1) && (current_item < pl.count())) {
+-		pl[current_item].setPlayed(TRUE);
++		pl[current_item].setPlayed(true);
+ 	}
+ 
+ 	if ( (old_current >= 0) && (old_current < listView->rowCount()) ) {
+@@ -472,7 +473,7 @@ void Playlist::addItem(QString filename, QString name, double duration) {
+ 			// Let's see if it looks like a file (no dvd://1 or something)
+ 			if (filename.indexOf(QRegExp("^.*://.*")) == -1) {
+ 				// Local file
+-				name = fi.fileName(); //fi.baseName(TRUE);
++				name = fi.fileName(); //fi.baseName(true);
+ 			} else {
+ 				// Stream
+ 				name = filename;
+@@ -819,7 +820,7 @@ void Playlist::playItem( int n ) {
+ 	QString filename_with_path = playlist_path + "/" + filename;
+ 
+ 	if (!filename.isEmpty()) {
+-		//pl[n].setPlayed(TRUE);
++		//pl[n].setPlayed(true);
+                 setCurrentItem(n);
+                 if (pref->play_files_from_start)
+ 			core->open(filename, 0);
+@@ -1034,7 +1035,7 @@ void Playlist::removeSelected() {
+ 	for (int n=0; n < listView->rowCount(); n++) {
+ 		if (listView->isSelected(n, 0)) {
+ 			qDebug(" row %d selected", n);
+-			pl[n].setMarkForDeletion(TRUE);
++			pl[n].setMarkForDeletion(true);
+ 			number_previous_item++;
+ 			if (first_selected == -1) first_selected = n;
+ 		}
+@@ -1080,7 +1081,7 @@ void Playlist::removeAll() {
+ void Playlist::clearPlayedTag() {
+ 	PlaylistItemList::iterator it;
+ 	for ( it = pl.begin(); it != pl.end(); ++it ) {
+-		(*it).setPlayed(FALSE);
++		(*it).setPlayed(false);
+ 	}
+ 	updateView();
+ }
+diff --git a/src/playlist.h b/src/playlist.h
+index 30f501a..53e6943 100644
+--- a/src/playlist.h
++++ b/src/playlist.h
+@@ -29,10 +29,10 @@ class PlaylistItem {
+ 
+ public:
+ 	PlaylistItem() { _filename=""; _name=""; _duration=0; 
+-                     _played = FALSE; _deleted=FALSE; };
++                     _played = false; _deleted=false; };
+ 	PlaylistItem(QString filename, QString name, double duration) {
+ 		         _filename = filename; _name = name; _duration = duration; 
+-                 _played = FALSE; _deleted = FALSE; };
++                 _played = false; _deleted = false; };
+ 	~PlaylistItem() {};
+ 
+ 	void setFilename(QString filename) { _filename = filename; };
+diff --git a/src/preferences.cpp b/src/preferences.cpp
+index 06eaf9f..3a5dd34 100644
+--- a/src/preferences.cpp
++++ b/src/preferences.cpp
+@@ -302,7 +302,7 @@ void Preferences::reset() {
+ 	style="";
+ #endif
+ 
+-	show_frame_counter = FALSE;
++	show_frame_counter = false;
+ 	show_motion_vectors = false;
+ 
+ #if DVDNAV_SUPPORT
+@@ -1199,7 +1199,7 @@ void Preferences::load() {
+ 	mouse_xbutton2_click_function = set->value("mouse_xbutton2_click_function", mouse_xbutton2_click_function).toString();
+ 	wheel_function = set->value("mouse_wheel_function", wheel_function).toInt();
+ 	int wheel_function_cycle_int = set->value("wheel_function_cycle", (int) wheel_function_cycle).toInt();
+-	wheel_function_cycle = QFlags<Preferences::WheelFunctions> (QFlag(wheel_function_cycle_int));
++	wheel_function_cycle = Preferences::WheelFunctions (QFlag(wheel_function_cycle_int));
+ 
+ 	seeking1 = set->value("seeking1", seeking1).toInt();
+ 	seeking2 = set->value("seeking2", seeking2).toInt();
+diff --git a/src/preferences.h b/src/preferences.h
+index faa38e7..aeaaeb2 100644
+--- a/src/preferences.h
++++ b/src/preferences.h
+@@ -305,7 +305,7 @@ public:
+ 	QString mouse_xbutton2_click_function;
+ 	int wheel_function;
+ 
+-	QFlags<WheelFunctions> wheel_function_cycle;
++	WheelFunctions wheel_function_cycle;
+ 
+ 
+ 	// Configurable seeking
+diff --git a/src/prefgeneral.cpp b/src/prefgeneral.cpp
+index 5cc3953..299f455 100644
+--- a/src/prefgeneral.cpp
++++ b/src/prefgeneral.cpp
+@@ -751,14 +751,14 @@ Preferences::OptionState PrefGeneral::scaleTempoFilter() {
+ void PrefGeneral::vo_combo_changed(int idx) {
+ 	qDebug("PrefGeneral::vo_combo_changed: %d", idx);
+ 	bool visible = (vo_combo->itemData(idx).toString() == "user_defined");
+-	vo_user_defined_edit->setShown(visible);
++	vo_user_defined_edit->setVisible(visible);
+ 	vo_user_defined_edit->setFocus();
+ }
+ 
+ void PrefGeneral::ao_combo_changed(int idx) {
+ 	qDebug("PrefGeneral::ao_combo_changed: %d", idx);
+ 	bool visible = (ao_combo->itemData(idx).toString() == "user_defined");
+-	ao_user_defined_edit->setShown(visible);
++	ao_user_defined_edit->setVisible(visible);
+ 	ao_user_defined_edit->setFocus();
+ }
+ 
+diff --git a/src/prefinput.cpp b/src/prefinput.cpp
+index 63496e2..1a2e79d 100644
+--- a/src/prefinput.cpp
++++ b/src/prefinput.cpp
+@@ -263,19 +263,19 @@ int PrefInput::wheelFunction() {
+ 	return wheel_function_combo->itemData(wheel_function_combo->currentIndex()).toInt();
+ }
+ 
+-void PrefInput::setWheelFunctionCycle(QFlags<Preferences::WheelFunctions> flags){
++void PrefInput::setWheelFunctionCycle(Preferences::WheelFunctions flags){
+ 	wheel_function_seek->setChecked(flags.testFlag(Preferences::Seeking));
+ 	wheel_function_volume->setChecked(flags.testFlag(Preferences::Volume));
+ 	wheel_function_zoom->setChecked(flags.testFlag(Preferences::Zoom));
+ 	wheel_function_speed->setChecked(flags.testFlag(Preferences::ChangeSpeed));
+ }
+ 
+-QFlags<Preferences::WheelFunctions> PrefInput::wheelFunctionCycle(){
+-	QFlags<Preferences::WheelFunctions> seekflags (QFlag ((int) Preferences::Seeking)) ;
+-	QFlags<Preferences::WheelFunctions> volumeflags (QFlag ((int) Preferences::Volume)) ;
+-	QFlags<Preferences::WheelFunctions> zoomflags (QFlag ((int) Preferences::Zoom)) ;
+-	QFlags<Preferences::WheelFunctions> speedflags (QFlag ((int) Preferences::ChangeSpeed)) ;
+-	QFlags<Preferences::WheelFunctions> out (QFlag (0));
++Preferences::WheelFunctions PrefInput::wheelFunctionCycle(){
++	Preferences::WheelFunctions seekflags (QFlag ((int) Preferences::Seeking)) ;
++	Preferences::WheelFunctions volumeflags (QFlag ((int) Preferences::Volume)) ;
++	Preferences::WheelFunctions zoomflags (QFlag ((int) Preferences::Zoom)) ;
++	Preferences::WheelFunctions speedflags (QFlag ((int) Preferences::ChangeSpeed)) ;
++	Preferences::WheelFunctions out (QFlag (0));
+ 	if(wheel_function_seek->isChecked()){
+ 		out = out | seekflags;
+ 	}
+diff --git a/src/prefinput.h b/src/prefinput.h
+index d91a76c..26becb3 100644
+--- a/src/prefinput.h
++++ b/src/prefinput.h
+@@ -73,8 +73,8 @@ protected:
+ 	void setWheelFunction(int function);
+ 	int wheelFunction();
+ 
+-	void setWheelFunctionCycle(QFlags<Preferences::WheelFunctions> flags);
+-	QFlags<Preferences::WheelFunctions> wheelFunctionCycle();
++	void setWheelFunctionCycle(Preferences::WheelFunctions flags);
++	Preferences::WheelFunctions wheelFunctionCycle();
+ 
+ protected:
+ 	virtual void retranslateStrings();
+diff --git a/src/prefwidget.h b/src/prefwidget.h
+index 9267ee3..2c004d8 100644
+--- a/src/prefwidget.h
++++ b/src/prefwidget.h
+@@ -26,7 +26,7 @@
+ 
+ 
+ #define TEST_AND_SET( Pref, Dialog ) \
+-	if ( Pref != Dialog ) { Pref = Dialog; requires_restart = TRUE; }
++	if ( Pref != Dialog ) { Pref = Dialog; requires_restart = true; }
+ 
+ class QEvent;
+ 
+diff --git a/src/retrievevideourl.cpp b/src/retrievevideourl.cpp
+index d1b13af..eb81c51 100644
+--- a/src/retrievevideourl.cpp
++++ b/src/retrievevideourl.cpp
+@@ -18,6 +18,7 @@
+ 
+ #include <QNetworkRequest>
+ #include <QRegExp>
++#include <QUrlQuery>
+ #include <QStringList>
+ #include <QDebug>
+ #include <QTextDocument>
+@@ -66,7 +67,7 @@ void RetrieveVideoUrl::gotVideoPage(QNetworkReply *reply)
+     {
+         code.remove(0, 4);
+         QUrl url(code);
+-        urlMap[url.queryItemValue("itag").toInt()] = code.remove(QRegExp("&itag=\\d+$"));
++        urlMap[QUrlQuery(url).queryItemValue("itag").toInt()] = code.remove(QRegExp("&itag=\\d+$"));
+     }
+     /*regex.setPattern("\\\"t\\\"\\s*:\\s*\\\"([^\\\"]*)");
+     regex.indexIn(replyString);
+diff --git a/src/scdelegate.cpp b/src/scdelegate.cpp
+index bf6b5bf..3bd14ee 100644
+--- a/src/scdelegate.cpp
++++ b/src/scdelegate.cpp
+@@ -62,7 +62,7 @@ void SCDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, co
+     painter->drawLine(0, 64, option.rect.width(), 64);
+     painter->drawPixmap( 8, 11, scIcon );
+     painter->translate(scIcon.width() + 16, 0 );
+-    SingleSCResult* sc = qVariantValue<SingleSCResult*>(index.data());
++    SingleSCResult* sc = index.data().value<SingleSCResult*>();
+     QFont font = painter->font();
+     font.setPixelSize(11);
+     painter->setFont(font);
+diff --git a/src/timeslider.cpp b/src/timeslider.cpp
+index 64293e4..f669ccf 100644
+--- a/src/timeslider.cpp
++++ b/src/timeslider.cpp
+@@ -26,7 +26,7 @@
+ 
+ TimeSlider::TimeSlider( QWidget * parent ) : MySlider(parent)
+ {
+-	dont_update = FALSE;
++	dont_update = false;
+ 	setMinimum(0);
+ #ifdef SEEKBAR_RESOLUTION
+ 	setMaximum(SEEKBAR_RESOLUTION);
+@@ -58,14 +58,14 @@ void TimeSlider::stopUpdate() {
+ 	#if DEBUG
+ 	qDebug("TimeSlider::stopUpdate");
+ 	#endif
+-	dont_update = TRUE;
++	dont_update = true;
+ }
+ 
+ void TimeSlider::resumeUpdate() {
+ 	#if DEBUG
+ 	qDebug("TimeSlider::resumeUpdate");
+ 	#endif
+-	dont_update = FALSE;
++	dont_update = false;
+ }
+ 
+ void TimeSlider::mouseReleased() {
+diff --git a/src/videopreview/videopreview.cpp b/src/videopreview/videopreview.cpp
+index 1a2601c..5cf5322 100644
+--- a/src/videopreview/videopreview.cpp
++++ b/src/videopreview/videopreview.cpp
+@@ -34,6 +34,7 @@
+ #include <QMessageBox>
+ #include <QSettings>
+ #include <QApplication>
++#include <QAction>
+ #include <QPixmapCache>
+ #include <QImageWriter>
+ #include <QImageReader>
+@@ -491,8 +492,8 @@ VideoInfo VideoPreview::getInfo(const QString & mplayer_path, const QString & fi
+ 
+ void VideoPreview::showInfo(bool visible) {
+ 	qDebug("VideoPreview::showInfo: %d", visible);
+-	info->setShown(visible);
+-	foot->setShown(visible);
++	info->setVisible(visible);
++	foot->setVisible(visible);
+ }
+ 
+ void VideoPreview::saveImage() {
+diff --git a/src/ytdelegate.cpp b/src/ytdelegate.cpp
+index a964afa..345a7ce 100644
+--- a/src/ytdelegate.cpp
++++ b/src/ytdelegate.cpp
+@@ -61,7 +61,7 @@ void YTDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, co
+             painter->fillRect(option.rect, Qt::white);
+         }
+     }
+-    SingleVideoItem* item = qVariantValue<SingleVideoItem*>(index.data());    
++    SingleVideoItem* item = index.data().value<SingleVideoItem*>();    
+     QSize sz = option.rect.size(); --sz.rheight();
+     painter->translate(option.rect.x() , option.rect.y());
+     painter->drawPixmap(0, 0, PIXWIDTH, sz.height(), item->pix );    

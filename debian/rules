@@ -9,7 +9,9 @@ DEB_MASTER_VERSION:=$(shell DEB_UPSTREAM_VERSION=${DEB_UPSTREAM_VERSION}; echo $
 export DH_VERBOSE=1
 
 QMAKE_OPTS = DEFINES+=NO_DEBUG_ON_CONSOLE
-MAKE_OPTS  = PREFIX=/usr QMAKE=qmake-qt4 LRELEASE=lrelease-qt4 QMAKE_OPTS="$(QMAKE_OPTS)"
+# Qt4 left the archive after 18.04: Qt5 is the one Qt every supported release has
+export QT_SELECT = qt5
+MAKE_OPTS  = PREFIX=/usr QMAKE=qmake LRELEASE=lrelease QMAKE_OPTS="$(QMAKE_OPTS)"
 
 override_dh_auto_clean:
 	[ ! -f src/Makefile ] || dh_auto_clean
@@ -20,6 +22,10 @@ override_dh_auto_build:
 override_dh_auto_install:
 	dh_auto_install -- $(MAKE_OPTS) DOC_PATH=/usr/share/doc/umplayer
 	rm -f debian/tmp/usr/share/doc/umplayer/Copying.txt
+
+# the GTK2 style it carries is built against Qt's private headers: it needs the Qt it was built with
+override_dh_gencontrol:
+	dh_gencontrol -- -Vqtbase:Abi=qtbase-abi-$(shell qmake -query QT_VERSION | tr . -)
 
 override_dh_strip:
 	dh_strip --dbg-package=umplayer-dbg

@@ -1,0 +1,7 @@
+01-Build-with-qmake-5.patch
+02-Download-subtitles-without-QHttp.patch
+03-Draw-the-MPC-styles-over-QProxyStyle.patch
+04-Replace-the-names-Qt5-removed.patch
+05-Recognise-the-version-of-mplayer-1.1-and-later.patch
+06-Carry-the-GTK2-style-Qt4-had.patch
+07-Use-the-desktop-s-dark-icons-on-a-dark-palette.patch

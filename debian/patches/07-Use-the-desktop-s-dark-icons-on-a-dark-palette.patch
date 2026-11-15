@@ -1,0 +1,173 @@
+Description: Use the desktop's dark icons on a dark palette
+ umplayer's icons are drawn for a light window: pale glossy bodies, bright
+ colours and a shadow that only shows on white. On a dark palette, as minos has,
+ they glare: the large pictures of the preferences, the list of its sections,
+ the icons of every menu (the same actions fill the popup, the tray menu, the
+ toolbars and the shortcuts table), and the buttons of the shortcuts editor and
+ the playlist. When the window colour of the palette is dark, take the icon of
+ the same meaning from the desktop's icon theme (on minos laga, drawn for black)
+ at the size of the original; a light palette, or a theme without that icon,
+ keeps umplayer's own. laga has no funnel, so the two menus of filters take its
+ gear; umplayer's own logo (About UMPlayer) has no drawing there and stays.
+Forwarded: no
+
+diff --git a/src/images.cpp b/src/images.cpp
+index e253006..f912679 100644
+--- a/src/images.cpp
++++ b/src/images.cpp
+@@ -27,6 +27,9 @@
+ #include <QFile>
+ #include <QDir>
+ #include <QFileInfo>
++#include <QApplication>
++#include <QPalette>
++#include <QIcon>
+ 
+ using namespace Global;
+ 
+@@ -82,6 +85,135 @@ QPixmap Images::loadIcon(const QString & theme_file_name) {
+ 	return p;
+ }
+ 
++// umplayer's icons are drawn for a light window: pale, glossy bodies, bright colours and a
++// shadow that only shows on white. On a dark palette they glare; the desktop's icon theme has
++// icons of the same meaning drawn for it (on minos, laga). Names are tried in order: the
++// freedesktop name first where one means the same, then the name laga ships; a name the
++// theme lacks leaves umplayer's own icon. Qt does not enlarge a theme icon, so the first
++// names are ones laga has at least as large as the original.
++static QPixmap darkThemeIcon(const QString & name, const QSize & size) {
++	static const char * const map[][5] = {
++		// the large pictures of the preferences, and the browse button
++		{ "find",             "edit-find",                  "system-search",         0,               0 },
++		{ "cdrom_drive",      "media-optical-cd",           "media-optical",         0,               0 },
++		{ "dvd_drive_big",    "media-optical-dvd",          "gnome-dev-disc-dvdrom", "media-optical", 0 },
++		{ "keyboard",         "input-keyboard",             0,                       0,               0 },
++		{ "mouse",            "input-mouse",                0,                       0,               0 },
++		{ "monitor",          "video-display",              0,                       0,               0 },
++		{ "resize_window",    "preferences-system-windows", "view-fullscreen",       0,               0 },
++		// the sections of the preferences
++		{ "pref_general",     "preferences-desktop",        0,                       0,               0 },
++		{ "pref_devices",     "drive-optical",              0,                       0,               0 },
++		{ "pref_performance", "utilities-system-monitor",   0,                       0,               0 },
++		{ "pref_subtitles",   "font-x-generic",             "preferences-desktop-font", 0,            0 },
++		{ "pref_gui",         "preferences-system-windows", 0,                       0,               0 },
++		{ "input_devices",    "input_devices_settings",     "preferences-desktop-keyboard", "input-keyboard", 0 },
++		{ "playlist",         "audio-x-mpegurl",            "media-playlist",        0,               0 },
++		{ "open_tv",          "video-television",           "tv",                    "video-display", 0 },
++		{ "pref_advanced",    "emblem-system",              "preferences-other",     0,               0 },
++		// the actions, menu by menu (the same actions fill the popup, the tray menu, the toolbars
++		// and the shortcuts table)
++		// Open
++		{ "file",             "text-x-generic",             "document-open",         0,               0 },
++		{ "recents",          "document-open-recent",       0,                       0,               0 },
++		{ "delete",           "edit-clear",                 0,                       0,               0 },
++		{ "openfolder",       "folder-open",                "folder",                0,               0 },
++		{ "folder",           "folder-open",                "folder",                0,               0 },
++		{ "open_playlist",    "audio-x-mpegurl",            "media-playlist",        0,               0 },
++		{ "dvd",              "media-optical-dvd",          "gnome-dev-disc-dvdrom", "media-optical", 0 },
++		{ "dvd_drive",        "media-optical-dvd",          "gnome-dev-disc-dvdrom", "media-optical", 0 },
++		{ "dvd_hd",           "folder-videos",              "video-x-generic",       0,               0 },
++		{ "vcd",              "media-optical-video",        "media-optical",         0,               0 },
++		{ "cdda",             "media-optical-audio",        "gnome-dev-cdrom-audio", "media-optical", 0 },
++		{ "url",              "applications-internet",      "emblem-web",            "insert-link",   0 },
++		{ "open_radio",       "internet-radio-new",         "library-internet-radio", 0,              0 },
++		{ "close",            "window-close",               "application-exit",      0,               0 },
++		{ "exit",             "application-exit",           0,                       0,               0 },
++		// Play
++		{ "play",             "media-playback-start",       0,                       0,               0 },
++		{ "pause",            "media-playback-pause",       0,                       0,               0 },
++		{ "stop",             "media-playback-stop",        0,                       0,               0 },
++		{ "frame_step",       "stock_goto_last",            0,                       0,               0 },
++		{ "rewind10s",        "media-seek-backward",        0,                       0,               0 },
++		{ "forward10s",       "media-seek-forward",         0,                       0,               0 },
++		{ "rewind1m",         "go-previous",                0,                       0,               0 },
++		{ "forward1m",        "go-next",                    0,                       0,               0 },
++		{ "rewind10m",        "go-first",                   0,                       0,               0 },
++		{ "forward10m",       "go-last",                    0,                       0,               0 },
++		{ "speed",            "chronometer",                0,                       0,               0 },
++		{ "repeat",           "media-playlist-repeat",      0,                       0,               0 },
++		{ "shuffle",          "media-playlist-shuffle",     0,                       0,               0 },
++		{ "previous",         "media-skip-backward",        0,                       0,               0 },
++		{ "next",             "media-skip-forward",         0,                       0,               0 },
++		// Video; laga has no funnel, so both menus of filters take its gear
++		{ "video_track",      "video-x-generic",            0,                       0,               0 },
++		{ "fullscreen",       "view-fullscreen",            0,                       0,               0 },
++		{ "video_size",       "zoom-original",              0,                       0,               0 },
++		{ "panscan",          "zoom-in",                    0,                       0,               0 },
++		{ "aspect",           "system-config-display",      "video-display",         0,               0 },
++		{ "deinterlace",      "format-justify-fill",        0,                       0,               0 },
++		{ "video_filters",    "system-run",                 0,                       0,               0 },
++		{ "rotate",           "object-rotate-right",        0,                       0,               0 },
++		{ "flip",             "object-flip-vertical",       0,                       0,               0 },
++		{ "mirror",           "object-flip-horizontal",     0,                       0,               0 },
++		{ "equalizer",        "colors",                     0,                       0,               0 },
++		{ "screenshot",       "camera-photo",               "applets-screenshooter", 0,               0 },
++		{ "screenshots",      "ksnapshot",                  "applets-screenshooter", 0,               0 },
++		{ "ontop",            "go-top",                     0,                       0,               0 },
++		{ "video_preview",    "view-calendar-month",        0,                       0,               0 },
++		{ "vector",           "go-jump",                    0,                       0,               0 },
++		// Audio
++		{ "audio_track",      "media-audiofile",            0,                       0,               0 },
++		{ "unload",           "media-eject",                0,                       0,               0 },
++		{ "audio_filters",    "system-run",                 0,                       0,               0 },
++		{ "audio_channels",   "audio-card",                 0,                       0,               0 },
++		{ "stereo_mode",      "gnome-settings-sound",       0,                       0,               0 },
++		{ "audio_equalizer",  "visualization",              0,                       0,               0 },
++		{ "volume",           "audio-volume-high",          0,                       0,               0 },
++		{ "mute",             "audio-volume-muted",         0,                       0,               0 },
++		// Subtitles
++		{ "sub",              "font-x-generic",             "preferences-desktop-font", 0,            0 },
++		{ "download_subs",    "edit-find",                  "system-search",         0,               0 },
++		// Browse
++		{ "title",            "video-x-generic",            0,                       0,               0 },
++		{ "chapter",          "bookmark-new",               0,                       0,               0 },
++		{ "angle",            "camera-video",               0,                       0,               0 },
++		// Options
++		{ "osd",              "video-display",              0,                       0,               0 },
++		{ "skin",             "preferences-desktop-theme",  0,                       0,               0 },
++		{ "toolbars",         "gnome-panel",                0,                       0,               0 },
++		{ "logs",             "logviewer",                  0,                       0,               0 },
++		{ "prefs",            "preferences-desktop",        "preferences-system",    0,               0 },
++		{ "preferences",      "preferences-desktop",        "preferences-system",    0,               0 },
++		// Tools and Help; umplayer's own logo has no drawing in laga and stays
++		{ "info",             "dialog-information",         "document-properties",   0,               0 },
++		{ "qt",               "qtcreator_logo_128",         0,                       0,               0 },
++		// the buttons of the shortcuts editor and of the playlist
++		{ "open",             "document-open",              0,                       0,               0 },
++		{ "save",             "document-save",              0,                       0,               0 },
++		{ "playlist_open",    "document-open",              0,                       0,               0 },
++		{ "playlist_save",    "document-save",              0,                       0,               0 },
++		{ "plus",             "list-add",                   0,                       0,               0 },
++		{ "minus",            "list-remove",                0,                       0,               0 },
++		{ "playlist_up",      "go-up",                      0,                       0,               0 },
++		{ "playlist_down",    "go-down",                    0,                       0,               0 },
++	};
++
++	if (size.isEmpty() || qApp->palette().color(QPalette::Window).lightness() >= 128) return QPixmap();
++
++	for (unsigned int n = 0; n < sizeof(map) / sizeof(map[0]); n++) {
++		if (name != QLatin1String(map[n][0])) continue;
++		for (int t = 1; t < 5 && map[n][t]; t++) {
++			// hasThemeIcon is exact: a name found only by dropping a "-suffix" does not count
++			if (QIcon::hasThemeIcon(QLatin1String(map[n][t]))) {
++				return QIcon::fromTheme(QLatin1String(map[n][t])).pixmap(size);
++			}
++		}
++		break;
++	}
++	return QPixmap();
++}
++
+ QPixmap Images::icon(QString name, int size, bool png) {
+ 	bool small = false;
+ 
+@@ -113,6 +245,9 @@ QPixmap Images::icon(QString name, int size, bool png) {
+ 	}
+ 
+ 	if (ok) {
++		QPixmap dark = darkThemeIcon(name, p.size());
++		if (!dark.isNull()) p = dark;
++
+ 		if (small) {
+ 			p = resize(&p);
+ 		}

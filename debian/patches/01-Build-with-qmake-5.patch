@@ -1,0 +1,663 @@
+Description: Build with qmake 5
+ Qt4 left Ubuntu after 18.04. Add the widgets module, which Qt5 split from gui; name the
+ sources under findsubtitles/ by their path, since qmake 5 no longer finds them
+ through DEPENDPATH; drop four ui_*.h that uic of Qt4 generated years ago and that
+ shadowed the ones the build generates.
+Forwarded: no
+
+diff --git a/src/findsubtitles/ui_filechooser.h b/src/findsubtitles/ui_filechooser.h
+deleted file mode 100644
+index a2cc1f1..0000000
+--- a/src/findsubtitles/ui_filechooser.h
++++ /dev/null
+@@ -1,70 +0,0 @@
+-/********************************************************************************
+-** Form generated from reading UI file 'filechooser.ui'
+-**
+-** Created: Mon 8. Feb 19:27:40 2010
+-**      by: Qt User Interface Compiler version 4.6.1
+-**
+-** WARNING! All changes made in this file will be lost when recompiling UI file!
+-********************************************************************************/
+-
+-#ifndef UI_FILECHOOSER_H
+-#define UI_FILECHOOSER_H
+-
+-#include <QtCore/QVariant>
+-#include <QtGui/QAction>
+-#include <QtGui/QApplication>
+-#include <QtGui/QButtonGroup>
+-#include <QtGui/QHBoxLayout>
+-#include <QtGui/QHeaderView>
+-#include <QtGui/QLineEdit>
+-#include <QtGui/QToolButton>
+-#include <QtGui/QWidget>
+-
+-QT_BEGIN_NAMESPACE
+-
+-class Ui_FileChooser
+-{
+-public:
+-    QHBoxLayout *hboxLayout;
+-    QLineEdit *line_edit;
+-    QToolButton *button;
+-
+-    void setupUi(QWidget *FileChooser)
+-    {
+-        if (FileChooser->objectName().isEmpty())
+-            FileChooser->setObjectName(QString::fromUtf8("FileChooser"));
+-        FileChooser->resize(407, 27);
+-        hboxLayout = new QHBoxLayout(FileChooser);
+-        hboxLayout->setSpacing(2);
+-        hboxLayout->setContentsMargins(2, 2, 2, 2);
+-        hboxLayout->setObjectName(QString::fromUtf8("hboxLayout"));
+-        line_edit = new QLineEdit(FileChooser);
+-        line_edit->setObjectName(QString::fromUtf8("line_edit"));
+-
+-        hboxLayout->addWidget(line_edit);
+-
+-        button = new QToolButton(FileChooser);
+-        button->setObjectName(QString::fromUtf8("button"));
+-
+-        hboxLayout->addWidget(button);
+-
+-
+-        retranslateUi(FileChooser);
+-
+-        QMetaObject::connectSlotsByName(FileChooser);
+-    } // setupUi
+-
+-    void retranslateUi(QWidget *FileChooser)
+-    {
+-        Q_UNUSED(FileChooser);
+-    } // retranslateUi
+-
+-};
+-
+-namespace Ui {
+-    class FileChooser: public Ui_FileChooser {};
+-} // namespace Ui
+-
+-QT_END_NAMESPACE
+-
+-#endif // UI_FILECHOOSER_H
+diff --git a/src/findsubtitles/ui_findsubtitlesconfigdialog.h b/src/findsubtitles/ui_findsubtitlesconfigdialog.h
+deleted file mode 100644
+index 1a70d28..0000000
+--- a/src/findsubtitles/ui_findsubtitlesconfigdialog.h
++++ /dev/null
+@@ -1,182 +0,0 @@
+-/********************************************************************************
+-** Form generated from reading UI file 'findsubtitlesconfigdialog.ui'
+-**
+-** Created: Mon 8. Feb 19:27:40 2010
+-**      by: Qt User Interface Compiler version 4.6.1
+-**
+-** WARNING! All changes made in this file will be lost when recompiling UI file!
+-********************************************************************************/
+-
+-#ifndef UI_FINDSUBTITLESCONFIGDIALOG_H
+-#define UI_FINDSUBTITLESCONFIGDIALOG_H
+-
+-#include <QtCore/QVariant>
+-#include <QtGui/QAction>
+-#include <QtGui/QApplication>
+-#include <QtGui/QButtonGroup>
+-#include <QtGui/QCheckBox>
+-#include <QtGui/QComboBox>
+-#include <QtGui/QDialog>
+-#include <QtGui/QDialogButtonBox>
+-#include <QtGui/QGridLayout>
+-#include <QtGui/QGroupBox>
+-#include <QtGui/QHeaderView>
+-#include <QtGui/QLabel>
+-#include <QtGui/QLineEdit>
+-#include <QtGui/QSpacerItem>
+-#include <QtGui/QSpinBox>
+-#include <QtGui/QVBoxLayout>
+-#include <QtGui/QWidget>
+-
+-QT_BEGIN_NAMESPACE
+-
+-class Ui_FindSubtitlesConfigDialog
+-{
+-public:
+-    QVBoxLayout *vboxLayout;
+-    QGroupBox *groupBox;
+-    QVBoxLayout *vboxLayout1;
+-    QCheckBox *use_proxy_check;
+-    QWidget *proxy_container;
+-    QGridLayout *gridLayout;
+-    QLabel *label_2;
+-    QLineEdit *proxy_hostname_edit;
+-    QLabel *label_3;
+-    QSpinBox *proxy_port_spin;
+-    QLabel *label_4;
+-    QLineEdit *proxy_username_edit;
+-    QLabel *label_5;
+-    QLineEdit *proxy_password_edit;
+-    QLabel *label_6;
+-    QComboBox *proxy_type_combo;
+-    QSpacerItem *spacerItem;
+-    QDialogButtonBox *buttonBox;
+-
+-    void setupUi(QDialog *FindSubtitlesConfigDialog)
+-    {
+-        if (FindSubtitlesConfigDialog->objectName().isEmpty())
+-            FindSubtitlesConfigDialog->setObjectName(QString::fromUtf8("FindSubtitlesConfigDialog"));
+-        FindSubtitlesConfigDialog->resize(489, 271);
+-        vboxLayout = new QVBoxLayout(FindSubtitlesConfigDialog);
+-        vboxLayout->setObjectName(QString::fromUtf8("vboxLayout"));
+-        groupBox = new QGroupBox(FindSubtitlesConfigDialog);
+-        groupBox->setObjectName(QString::fromUtf8("groupBox"));
+-        vboxLayout1 = new QVBoxLayout(groupBox);
+-        vboxLayout1->setObjectName(QString::fromUtf8("vboxLayout1"));
+-        use_proxy_check = new QCheckBox(groupBox);
+-        use_proxy_check->setObjectName(QString::fromUtf8("use_proxy_check"));
+-
+-        vboxLayout1->addWidget(use_proxy_check);
+-
+-        proxy_container = new QWidget(groupBox);
+-        proxy_container->setObjectName(QString::fromUtf8("proxy_container"));
+-        proxy_container->setEnabled(false);
+-        gridLayout = new QGridLayout(proxy_container);
+-        gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+-        label_2 = new QLabel(proxy_container);
+-        label_2->setObjectName(QString::fromUtf8("label_2"));
+-
+-        gridLayout->addWidget(label_2, 0, 0, 1, 1);
+-
+-        proxy_hostname_edit = new QLineEdit(proxy_container);
+-        proxy_hostname_edit->setObjectName(QString::fromUtf8("proxy_hostname_edit"));
+-
+-        gridLayout->addWidget(proxy_hostname_edit, 0, 1, 1, 2);
+-
+-        label_3 = new QLabel(proxy_container);
+-        label_3->setObjectName(QString::fromUtf8("label_3"));
+-        label_3->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+-
+-        gridLayout->addWidget(label_3, 0, 3, 1, 1);
+-
+-        proxy_port_spin = new QSpinBox(proxy_container);
+-        proxy_port_spin->setObjectName(QString::fromUtf8("proxy_port_spin"));
+-        proxy_port_spin->setMaximum(65535);
+-
+-        gridLayout->addWidget(proxy_port_spin, 0, 4, 1, 1);
+-
+-        label_4 = new QLabel(proxy_container);
+-        label_4->setObjectName(QString::fromUtf8("label_4"));
+-
+-        gridLayout->addWidget(label_4, 1, 0, 1, 1);
+-
+-        proxy_username_edit = new QLineEdit(proxy_container);
+-        proxy_username_edit->setObjectName(QString::fromUtf8("proxy_username_edit"));
+-
+-        gridLayout->addWidget(proxy_username_edit, 1, 1, 1, 4);
+-
+-        label_5 = new QLabel(proxy_container);
+-        label_5->setObjectName(QString::fromUtf8("label_5"));
+-
+-        gridLayout->addWidget(label_5, 2, 0, 1, 1);
+-
+-        proxy_password_edit = new QLineEdit(proxy_container);
+-        proxy_password_edit->setObjectName(QString::fromUtf8("proxy_password_edit"));
+-        proxy_password_edit->setEchoMode(QLineEdit::Password);
+-
+-        gridLayout->addWidget(proxy_password_edit, 2, 1, 1, 4);
+-
+-        label_6 = new QLabel(proxy_container);
+-        label_6->setObjectName(QString::fromUtf8("label_6"));
+-
+-        gridLayout->addWidget(label_6, 3, 0, 1, 1);
+-
+-        proxy_type_combo = new QComboBox(proxy_container);
+-        proxy_type_combo->setObjectName(QString::fromUtf8("proxy_type_combo"));
+-
+-        gridLayout->addWidget(proxy_type_combo, 3, 1, 1, 1);
+-
+-        spacerItem = new QSpacerItem(261, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+-
+-        gridLayout->addItem(spacerItem, 3, 2, 1, 3);
+-
+-
+-        vboxLayout1->addWidget(proxy_container);
+-
+-
+-        vboxLayout->addWidget(groupBox);
+-
+-        buttonBox = new QDialogButtonBox(FindSubtitlesConfigDialog);
+-        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+-        buttonBox->setOrientation(Qt::Horizontal);
+-        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok);
+-
+-        vboxLayout->addWidget(buttonBox);
+-
+-#ifndef QT_NO_SHORTCUT
+-        label_2->setBuddy(proxy_hostname_edit);
+-        label_3->setBuddy(proxy_port_spin);
+-        label_4->setBuddy(proxy_username_edit);
+-        label_5->setBuddy(proxy_password_edit);
+-        label_6->setBuddy(proxy_type_combo);
+-#endif // QT_NO_SHORTCUT
+-
+-        retranslateUi(FindSubtitlesConfigDialog);
+-        QObject::connect(buttonBox, SIGNAL(accepted()), FindSubtitlesConfigDialog, SLOT(accept()));
+-        QObject::connect(buttonBox, SIGNAL(rejected()), FindSubtitlesConfigDialog, SLOT(reject()));
+-        QObject::connect(use_proxy_check, SIGNAL(toggled(bool)), proxy_container, SLOT(setEnabled(bool)));
+-
+-        QMetaObject::connectSlotsByName(FindSubtitlesConfigDialog);
+-    } // setupUi
+-
+-    void retranslateUi(QDialog *FindSubtitlesConfigDialog)
+-    {
+-        FindSubtitlesConfigDialog->setWindowTitle(QApplication::translate("FindSubtitlesConfigDialog", "Advanced options", 0, QApplication::UnicodeUTF8));
+-        groupBox->setTitle(QApplication::translate("FindSubtitlesConfigDialog", "Proxy", 0, QApplication::UnicodeUTF8));
+-        use_proxy_check->setText(QApplication::translate("FindSubtitlesConfigDialog", "&Enable proxy", 0, QApplication::UnicodeUTF8));
+-        label_2->setText(QApplication::translate("FindSubtitlesConfigDialog", "&Host:", 0, QApplication::UnicodeUTF8));
+-        label_3->setText(QApplication::translate("FindSubtitlesConfigDialog", "&Port:", 0, QApplication::UnicodeUTF8));
+-        label_4->setText(QApplication::translate("FindSubtitlesConfigDialog", "&Username:", 0, QApplication::UnicodeUTF8));
+-        label_5->setText(QApplication::translate("FindSubtitlesConfigDialog", "Pa&ssword:", 0, QApplication::UnicodeUTF8));
+-        label_6->setText(QApplication::translate("FindSubtitlesConfigDialog", "&Type:", 0, QApplication::UnicodeUTF8));
+-    } // retranslateUi
+-
+-};
+-
+-namespace Ui {
+-    class FindSubtitlesConfigDialog: public Ui_FindSubtitlesConfigDialog {};
+-} // namespace Ui
+-
+-QT_END_NAMESPACE
+-
+-#endif // UI_FINDSUBTITLESCONFIGDIALOG_H
+diff --git a/src/findsubtitles/ui_findsubtitleswindow.h b/src/findsubtitles/ui_findsubtitleswindow.h
+deleted file mode 100644
+index 3e7bc14..0000000
+--- a/src/findsubtitles/ui_findsubtitleswindow.h
++++ /dev/null
+@@ -1,196 +0,0 @@
+-/********************************************************************************
+-** Form generated from reading UI file 'findsubtitleswindow.ui'
+-**
+-** Created: Mon 8. Feb 19:27:40 2010
+-**      by: Qt User Interface Compiler version 4.6.1
+-**
+-** WARNING! All changes made in this file will be lost when recompiling UI file!
+-********************************************************************************/
+-
+-#ifndef UI_FINDSUBTITLESWINDOW_H
+-#define UI_FINDSUBTITLESWINDOW_H
+-
+-#include <QtCore/QVariant>
+-#include <QtGui/QAction>
+-#include <QtGui/QApplication>
+-#include <QtGui/QButtonGroup>
+-#include <QtGui/QComboBox>
+-#include <QtGui/QDialogButtonBox>
+-#include <QtGui/QHBoxLayout>
+-#include <QtGui/QHeaderView>
+-#include <QtGui/QLabel>
+-#include <QtGui/QProgressBar>
+-#include <QtGui/QPushButton>
+-#include <QtGui/QSpacerItem>
+-#include <QtGui/QTreeView>
+-#include <QtGui/QVBoxLayout>
+-#include <QtGui/QWidget>
+-#include "filechooser.h"
+-
+-QT_BEGIN_NAMESPACE
+-
+-class Ui_FindSubtitlesWindow
+-{
+-public:
+-    QVBoxLayout *vboxLayout;
+-    QHBoxLayout *hboxLayout;
+-    QLabel *subtitles_for_label;
+-    FileChooser *file_chooser;
+-    QTreeView *view;
+-    QHBoxLayout *hboxLayout1;
+-    QLabel *filter_language_label;
+-    QComboBox *language_filter;
+-    QSpacerItem *spacerItem;
+-    QPushButton *configure_button;
+-    QPushButton *refresh_button;
+-    QPushButton *download_button;
+-    QHBoxLayout *hboxLayout2;
+-    QLabel *status;
+-    QProgressBar *progress;
+-    QDialogButtonBox *buttonBox;
+-
+-    void setupUi(QWidget *FindSubtitlesWindow)
+-    {
+-        if (FindSubtitlesWindow->objectName().isEmpty())
+-            FindSubtitlesWindow->setObjectName(QString::fromUtf8("FindSubtitlesWindow"));
+-        FindSubtitlesWindow->resize(649, 385);
+-        vboxLayout = new QVBoxLayout(FindSubtitlesWindow);
+-        vboxLayout->setSpacing(6);
+-        vboxLayout->setObjectName(QString::fromUtf8("vboxLayout"));
+-        vboxLayout->setContentsMargins(9, 9, 9, 9);
+-        hboxLayout = new QHBoxLayout();
+-        hboxLayout->setSpacing(6);
+-        hboxLayout->setObjectName(QString::fromUtf8("hboxLayout"));
+-        hboxLayout->setContentsMargins(0, 0, 0, 0);
+-        subtitles_for_label = new QLabel(FindSubtitlesWindow);
+-        subtitles_for_label->setObjectName(QString::fromUtf8("subtitles_for_label"));
+-
+-        hboxLayout->addWidget(subtitles_for_label);
+-
+-        file_chooser = new FileChooser(FindSubtitlesWindow);
+-        file_chooser->setObjectName(QString::fromUtf8("file_chooser"));
+-
+-        hboxLayout->addWidget(file_chooser);
+-
+-
+-        vboxLayout->addLayout(hboxLayout);
+-
+-        view = new QTreeView(FindSubtitlesWindow);
+-        view->setObjectName(QString::fromUtf8("view"));
+-
+-        vboxLayout->addWidget(view);
+-
+-        hboxLayout1 = new QHBoxLayout();
+-        hboxLayout1->setSpacing(6);
+-        hboxLayout1->setObjectName(QString::fromUtf8("hboxLayout1"));
+-        hboxLayout1->setContentsMargins(0, 0, 0, 0);
+-        filter_language_label = new QLabel(FindSubtitlesWindow);
+-        filter_language_label->setObjectName(QString::fromUtf8("filter_language_label"));
+-
+-        hboxLayout1->addWidget(filter_language_label);
+-
+-        language_filter = new QComboBox(FindSubtitlesWindow);
+-        language_filter->setObjectName(QString::fromUtf8("language_filter"));
+-        language_filter->setEditable(false);
+-
+-        hboxLayout1->addWidget(language_filter);
+-
+-        spacerItem = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+-
+-        hboxLayout1->addItem(spacerItem);
+-
+-        configure_button = new QPushButton(FindSubtitlesWindow);
+-        configure_button->setObjectName(QString::fromUtf8("configure_button"));
+-
+-        hboxLayout1->addWidget(configure_button);
+-
+-        refresh_button = new QPushButton(FindSubtitlesWindow);
+-        refresh_button->setObjectName(QString::fromUtf8("refresh_button"));
+-        refresh_button->setEnabled(false);
+-
+-        hboxLayout1->addWidget(refresh_button);
+-
+-        download_button = new QPushButton(FindSubtitlesWindow);
+-        download_button->setObjectName(QString::fromUtf8("download_button"));
+-        download_button->setEnabled(false);
+-
+-        hboxLayout1->addWidget(download_button);
+-
+-
+-        vboxLayout->addLayout(hboxLayout1);
+-
+-        hboxLayout2 = new QHBoxLayout();
+-        hboxLayout2->setSpacing(6);
+-        hboxLayout2->setObjectName(QString::fromUtf8("hboxLayout2"));
+-        hboxLayout2->setContentsMargins(0, 0, 0, 0);
+-        status = new QLabel(FindSubtitlesWindow);
+-        status->setObjectName(QString::fromUtf8("status"));
+-        QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+-        sizePolicy.setHorizontalStretch(0);
+-        sizePolicy.setVerticalStretch(0);
+-        sizePolicy.setHeightForWidth(status->sizePolicy().hasHeightForWidth());
+-        status->setSizePolicy(sizePolicy);
+-        status->setFrameShape(QFrame::Panel);
+-        status->setFrameShadow(QFrame::Sunken);
+-
+-        hboxLayout2->addWidget(status);
+-
+-        progress = new QProgressBar(FindSubtitlesWindow);
+-        progress->setObjectName(QString::fromUtf8("progress"));
+-        QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
+-        sizePolicy1.setHorizontalStretch(0);
+-        sizePolicy1.setVerticalStretch(0);
+-        sizePolicy1.setHeightForWidth(progress->sizePolicy().hasHeightForWidth());
+-        progress->setSizePolicy(sizePolicy1);
+-        progress->setValue(0);
+-        progress->setTextVisible(false);
+-        progress->setOrientation(Qt::Horizontal);
+-
+-        hboxLayout2->addWidget(progress);
+-
+-
+-        vboxLayout->addLayout(hboxLayout2);
+-
+-        buttonBox = new QDialogButtonBox(FindSubtitlesWindow);
+-        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+-        buttonBox->setOrientation(Qt::Horizontal);
+-        buttonBox->setStandardButtons(QDialogButtonBox::Close);
+-
+-        vboxLayout->addWidget(buttonBox);
+-
+-#ifndef QT_NO_SHORTCUT
+-        subtitles_for_label->setBuddy(file_chooser);
+-        filter_language_label->setBuddy(language_filter);
+-#endif // QT_NO_SHORTCUT
+-        QWidget::setTabOrder(file_chooser, view);
+-        QWidget::setTabOrder(view, language_filter);
+-        QWidget::setTabOrder(language_filter, refresh_button);
+-        QWidget::setTabOrder(refresh_button, download_button);
+-        QWidget::setTabOrder(download_button, buttonBox);
+-
+-        retranslateUi(FindSubtitlesWindow);
+-        QObject::connect(buttonBox, SIGNAL(rejected()), FindSubtitlesWindow, SLOT(close()));
+-
+-        QMetaObject::connectSlotsByName(FindSubtitlesWindow);
+-    } // setupUi
+-
+-    void retranslateUi(QWidget *FindSubtitlesWindow)
+-    {
+-        FindSubtitlesWindow->setWindowTitle(QApplication::translate("FindSubtitlesWindow", "Find Subtitles", 0, QApplication::UnicodeUTF8));
+-        subtitles_for_label->setText(QApplication::translate("FindSubtitlesWindow", "&Subtitles for", 0, QApplication::UnicodeUTF8));
+-        filter_language_label->setText(QApplication::translate("FindSubtitlesWindow", "&Language:", 0, QApplication::UnicodeUTF8));
+-        configure_button->setText(QApplication::translate("FindSubtitlesWindow", "&Options", 0, QApplication::UnicodeUTF8));
+-        refresh_button->setText(QApplication::translate("FindSubtitlesWindow", "&Refresh", 0, QApplication::UnicodeUTF8));
+-        download_button->setText(QApplication::translate("FindSubtitlesWindow", "&Download", 0, QApplication::UnicodeUTF8));
+-        status->setText(QString());
+-    } // retranslateUi
+-
+-};
+-
+-namespace Ui {
+-    class FindSubtitlesWindow: public Ui_FindSubtitlesWindow {};
+-} // namespace Ui
+-
+-QT_END_NAMESPACE
+-
+-#endif // UI_FINDSUBTITLESWINDOW_H
+diff --git a/src/findsubtitles/ui_subchooserdialog.h b/src/findsubtitles/ui_subchooserdialog.h
+deleted file mode 100644
+index befbe3a..0000000
+--- a/src/findsubtitles/ui_subchooserdialog.h
++++ /dev/null
+@@ -1,126 +0,0 @@
+-/********************************************************************************
+-** Form generated from reading UI file 'subchooserdialog.ui'
+-**
+-** Created: Mon 8. Feb 19:27:40 2010
+-**      by: Qt User Interface Compiler version 4.6.1
+-**
+-** WARNING! All changes made in this file will be lost when recompiling UI file!
+-********************************************************************************/
+-
+-#ifndef UI_SUBCHOOSERDIALOG_H
+-#define UI_SUBCHOOSERDIALOG_H
+-
+-#include <QtCore/QVariant>
+-#include <QtGui/QAction>
+-#include <QtGui/QApplication>
+-#include <QtGui/QButtonGroup>
+-#include <QtGui/QDialog>
+-#include <QtGui/QDialogButtonBox>
+-#include <QtGui/QFrame>
+-#include <QtGui/QHBoxLayout>
+-#include <QtGui/QHeaderView>
+-#include <QtGui/QLabel>
+-#include <QtGui/QListWidget>
+-#include <QtGui/QPushButton>
+-#include <QtGui/QSpacerItem>
+-#include <QtGui/QVBoxLayout>
+-
+-QT_BEGIN_NAMESPACE
+-
+-class Ui_SubChooserDialog
+-{
+-public:
+-    QVBoxLayout *vboxLayout;
+-    QLabel *textLabel;
+-    QListWidget *listWidget;
+-    QHBoxLayout *hboxLayout;
+-    QPushButton *selectAll;
+-    QPushButton *selectNone;
+-    QSpacerItem *spacerItem;
+-    QFrame *line;
+-    QDialogButtonBox *buttonBox;
+-
+-    void setupUi(QDialog *SubChooserDialog)
+-    {
+-        if (SubChooserDialog->objectName().isEmpty())
+-            SubChooserDialog->setObjectName(QString::fromUtf8("SubChooserDialog"));
+-        SubChooserDialog->resize(370, 329);
+-        vboxLayout = new QVBoxLayout(SubChooserDialog);
+-        vboxLayout->setObjectName(QString::fromUtf8("vboxLayout"));
+-        textLabel = new QLabel(SubChooserDialog);
+-        textLabel->setObjectName(QString::fromUtf8("textLabel"));
+-        textLabel->setAlignment(Qt::AlignVCenter);
+-        textLabel->setWordWrap(true);
+-
+-        vboxLayout->addWidget(textLabel);
+-
+-        listWidget = new QListWidget(SubChooserDialog);
+-        listWidget->setObjectName(QString::fromUtf8("listWidget"));
+-        listWidget->setEditTriggers(QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::NoEditTriggers);
+-        listWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+-        listWidget->setViewMode(QListView::ListMode);
+-        listWidget->setUniformItemSizes(true);
+-        listWidget->setSortingEnabled(true);
+-
+-        vboxLayout->addWidget(listWidget);
+-
+-        hboxLayout = new QHBoxLayout();
+-        hboxLayout->setSpacing(6);
+-        hboxLayout->setObjectName(QString::fromUtf8("hboxLayout"));
+-        hboxLayout->setContentsMargins(0, 0, 0, 0);
+-        selectAll = new QPushButton(SubChooserDialog);
+-        selectAll->setObjectName(QString::fromUtf8("selectAll"));
+-
+-        hboxLayout->addWidget(selectAll);
+-
+-        selectNone = new QPushButton(SubChooserDialog);
+-        selectNone->setObjectName(QString::fromUtf8("selectNone"));
+-
+-        hboxLayout->addWidget(selectNone);
+-
+-        spacerItem = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+-
+-        hboxLayout->addItem(spacerItem);
+-
+-
+-        vboxLayout->addLayout(hboxLayout);
+-
+-        line = new QFrame(SubChooserDialog);
+-        line->setObjectName(QString::fromUtf8("line"));
+-        line->setFrameShape(QFrame::HLine);
+-        line->setFrameShadow(QFrame::Sunken);
+-
+-        vboxLayout->addWidget(line);
+-
+-        buttonBox = new QDialogButtonBox(SubChooserDialog);
+-        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+-        buttonBox->setOrientation(Qt::Horizontal);
+-        buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok);
+-
+-        vboxLayout->addWidget(buttonBox);
+-
+-
+-        retranslateUi(SubChooserDialog);
+-        QObject::connect(buttonBox, SIGNAL(accepted()), SubChooserDialog, SLOT(accept()));
+-        QObject::connect(buttonBox, SIGNAL(rejected()), SubChooserDialog, SLOT(reject()));
+-
+-        QMetaObject::connectSlotsByName(SubChooserDialog);
+-    } // setupUi
+-
+-    void retranslateUi(QDialog *SubChooserDialog)
+-    {
+-        SubChooserDialog->setWindowTitle(QApplication::translate("SubChooserDialog", "Subtitle selection", 0, QApplication::UnicodeUTF8));
+-        textLabel->setText(QApplication::translate("SubChooserDialog", "This archive contains more than one subtitle file. Please choose the ones you want to extract.", 0, QApplication::UnicodeUTF8));
+-        selectAll->setText(QApplication::translate("SubChooserDialog", "Select All", 0, QApplication::UnicodeUTF8));
+-        selectNone->setText(QApplication::translate("SubChooserDialog", "Select None", 0, QApplication::UnicodeUTF8));
+-    } // retranslateUi
+-
+-};
+-
+-namespace Ui {
+-    class SubChooserDialog: public Ui_SubChooserDialog {};
+-} // namespace Ui
+-
+-QT_END_NAMESPACE
+-
+-#endif // UI_SUBCHOOSERDIALOG_H
+diff --git a/src/umplayer.pro b/src/umplayer.pro
+index 2f23fe9..5ddd363 100644
+--- a/src/umplayer.pro
++++ b/src/umplayer.pro
+@@ -3,6 +3,7 @@ LANGUAGE = C++
+ CONFIG += qt warn_on debug
+ QT += network \
+     xml
++greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+ RESOURCES = icons.qrc
+ INCLUDEPATH += findsubtitles \
+     videopreview \
+@@ -343,25 +344,26 @@ contains( DEFINES, DOWNLOAD_SUBS ) {
+         findsubtitles/quazip
+     DEPENDPATH += findsubtitles/filedownloader \
+         findsubtitles/quazip
+-    HEADERS += filedownloader.h \
+-        subchooserdialog.h
+-    SOURCES += filedownloader.cpp \
+-        subchooserdialog.cpp
+-    FORMS += subchooserdialog.ui
+-    HEADERS += crypt.h \
+-        ioapi.h \
+-        quazip.h \
+-        quazipfile.h \
+-        quazipfileinfo.h \
+-        quazipnewinfo.h \
+-        unzip.h \
+-        zip.h
+-    SOURCES += ioapi.c \
+-        quazip.cpp \
+-        quazipfile.cpp \
+-        quazipnewinfo.cpp \
+-        unzip.c \
+-        zip.c
++    # qmake 5 no longer finds sources through DEPENDPATH: say where they are
++    HEADERS += findsubtitles/filedownloader/filedownloader.h \
++        findsubtitles/subchooserdialog.h
++    SOURCES += findsubtitles/filedownloader/filedownloader.cpp \
++        findsubtitles/subchooserdialog.cpp
++    FORMS += findsubtitles/subchooserdialog.ui
++    HEADERS += findsubtitles/quazip/crypt.h \
++        findsubtitles/quazip/ioapi.h \
++        findsubtitles/quazip/quazip.h \
++        findsubtitles/quazip/quazipfile.h \
++        findsubtitles/quazip/quazipfileinfo.h \
++        findsubtitles/quazip/quazipnewinfo.h \
++        findsubtitles/quazip/unzip.h \
++        findsubtitles/quazip/zip.h
++    SOURCES += findsubtitles/quazip/ioapi.c \
++        findsubtitles/quazip/quazip.cpp \
++        findsubtitles/quazip/quazipfile.cpp \
++        findsubtitles/quazip/quazipnewinfo.cpp \
++        findsubtitles/quazip/unzip.c \
++        findsubtitles/quazip/zip.c
+     LIBS += -lz
+     win32 { 
+         INCLUDEPATH += c:\\development\\zlib-1.2.3
